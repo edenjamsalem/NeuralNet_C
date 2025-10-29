@@ -1,15 +1,15 @@
-NAME = NeuralNet_C
-CC = gcc
-FLAGS = -Wall -Werror -Wextra
+NAME = NeuralNet_CPP
+CC = g++
+FLAGS = -Wall -Werror -Wextra -std=c++17
 
 SRCDIR = ./srcs
-SRCS = $(SRCDIR)/main.c
+SRCS = $(SRCDIR)/main.cpp
 
 OBJDIR = ./build
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 # compile step
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) $(FLAGS) -c $< -o $@
 
 # link step
