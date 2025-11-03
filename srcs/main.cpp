@@ -1,8 +1,25 @@
 #include "../includes/header.hpp"
 
-int main(void) {
-	std::vector<double> inputs;
-	std::vector<size_t> layer_sizes = {16, 16, 10}; // excludes input layer
+/*
+	struct MNIST_dataset {
+		OuterContainer<InnerContainer<PixelType>> training_images;
+		OuterContainer<InnerContainer<PixelType>> test_images;
+		OuterContainer<LabelType> training_labels;
+		OuterContainer<LabelType> test_labels;
+	};
+*/
 
-	Network network(inputs, {16, 16, 10});
+int main(void) {
+	auto dataset = mnist::read_dataset<std::vector, std::vector, double, uint8_t>();
+	
+	// normalize grayscale 0.0-255.0 -> 0-1 double
+	for (auto &image : dataset.training_images) {
+		for (auto &pixel : image) {
+			pixel /= 255.0;
+		}
+	}
+	
+	size_t input_size = dataset.test_images[0].size();
+
+	Network network({input_size, 16, 16, 10});
 }
