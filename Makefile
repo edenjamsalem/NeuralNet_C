@@ -3,7 +3,9 @@ CC = g++
 FLAGS = -Wall -Werror -Wextra -std=c++17
 
 SRCDIR = ./srcs
-SRCS = $(SRCDIR)/main.cpp
+SRCS = 	$(SRCDIR)/main.cpp	\
+		$(SRCDIR)/utils.cpp	\
+		$(SRCDIR)/Network.cpp
 
 OBJDIR = ./build
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
