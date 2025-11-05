@@ -10,12 +10,12 @@ Network::Network(const std::vector<size_t> &layer_sizes) :
 {
 	// init weights
 	for (size_t layer = 0; layer < this->num_layers - 1; layer++) {
-		weights[layer].init(layer_sizes[layer], layer_sizes[layer + 1]);
+		weights[layer].init(layer_sizes[layer + 1], layer_sizes[layer]);
 
 		// seed random values
-		for (size_t from = 0; from < this->layer_sizes[layer]; from++) {
-			for (size_t to = 0; to < this->layer_sizes[layer + 1]; to++) {
-				this->weights[layer](from, to) = gen_random_double();
+		for (size_t to = 0; to < this->layer_sizes[layer + 1]; to++) { 	// indexes backwards
+			for (size_t from = 0; from < this->layer_sizes[layer]; from++) {
+				this->weights[layer](to, from) = gen_random_double();
 			}
 		}
 	}
@@ -26,23 +26,14 @@ void Network::setInputs(std::vector<double> image) {
 }
 
 void Network::feedForward() {
-	// handle input layer
-	for (size_t to = 0; to < this->layer_sizes[1]; to++) {
-		double z = 0;
-		for (size_t from = 0; from < this->layer_sizes[0]; from++) {
-			double signal = this->input_layer[from];
-			z += this->weights[0](from, to) * signal;
-		}
-		double bias = this->network(0, to).bias;
-		this->network(0, to).signal = sigmoid(z + bias);
-	}
-
 	// handle rest of network
-	for (size_t layer = 1; layer < num_layers - 1; layer++) {
+	for (size_t layer = 0; layer < num_layers - 1; layer++) {
 		for (size_t to = 0; to < this->layer_sizes[layer + 1]; to++) {
 			double z = 0;
 			for (size_t from = 0; from < this->layer_sizes[layer]; from++) {
-				z += this->weights[layer](from, to) * this->network(layer, from).signal;
+				// network[0] is first hidden layer so [layer - 1] is needed
+				double signal = (layer == 0) ? this->input_layer[from] : this->network(layer - 1, from).signal;
+				z += this->weights[layer](to, from) * signal;
 			}
 			double bias = this->network(layer, to).bias;
 			this->network(layer, to).signal = sigmoid(z + bias);

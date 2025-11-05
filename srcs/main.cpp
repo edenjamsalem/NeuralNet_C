@@ -9,7 +9,7 @@
 	};
 */
 
-int main(void) {
+int main() {
 	auto dataset = mnist::read_dataset<std::vector, std::vector, double, uint8_t>();
 	
 	// normalize grayscale 0.0-255.0 --> 0.0-1.0
@@ -20,7 +20,7 @@ int main(void) {
 	}
 	
 	// create network
-	size_t input_size = dataset.test_images[0].size();
+	size_t input_size = dataset.test_images[0].size(); // assumes inputs size is the same for all images
 	Network network({input_size, 16, 16, 10});
 
 	// train network on each image in the training set

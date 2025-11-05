@@ -2,7 +2,9 @@
 #include "flatArrays.tpp"
 #include "utils.hpp"
 
-#define MAX_LAYERS 4
+#ifndef NETWORK_HPP
+	#define MAX_LAYERS 4
+#endif
 
 struct Neuron {
 	double bias;
@@ -13,7 +15,7 @@ struct Neuron {
 class Network {
 	private:
 		size_t num_layers;
-		size_t max_layer_len; 	// excludeding input layer 
+		size_t max_layer_len; 	// excluding input layer 
 		std::vector<size_t> layer_sizes;
 
 		// input values handled separately as they are large
@@ -34,3 +36,4 @@ class Network {
 		void feedForward();
 
 };
+
