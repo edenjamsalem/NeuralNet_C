@@ -2,30 +2,35 @@
 #include "flatArrays.tpp"
 #include "utils.hpp"
 
+#define MAX_LAYERS 4
+
 struct Neuron {
 	double bias;
 	double signal;
     Neuron() : bias(gen_random_double()), signal(0.0) {}
 };
 
-
 class Network {
 	private:
 		size_t num_layers;
-		size_t max_len; // exclusing input layer
+		size_t max_layer_len; 	// excludeding input layer 
+		std::vector<size_t> layer_sizes;
 
 		// input values handled separately as they are large
 		std::vector<double> input_layer;
-		flat2DArray<double> input_weights;
 		
 		// rest of network is here
 		flat2DArray<Neuron> network;
-		flat3DArray<double> weights;
+		flat2DArray<double> weights[MAX_LAYERS];
 
 	public: 
+		// Constructors
 		Network(std::vector<size_t> &layer_sizes);
 		Network(const std::vector<size_t> &layer_sizes);
-	
-	// ~Network();
+		// ~Network();
+
+		void setInputs(std::vector<double> image);
+		void trainOn(std::vector<double> image);
+		void feedForward();
 
 };

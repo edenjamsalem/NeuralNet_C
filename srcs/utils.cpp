@@ -5,3 +5,11 @@ double gen_random_double() {
     static std::uniform_real_distribution<double> dist(-1.0, 1.0);
     return dist(gen);
 }
+
+double sigmoid(double x) {
+    return (1.0 / (1.0 + std::exp(-x)));
+}
+
+double ReLU(double x) {
+    return (x < 0.0 ? 0.0 : x);
+}

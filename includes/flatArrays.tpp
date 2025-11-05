@@ -2,20 +2,28 @@
 #include <vector>
 
 template <typename T>
-struct flat2DArray {
-	std::vector<T> data;
-	size_t rows, cols;
+class flat2DArray {
+	public:
+		std::vector<T> data;
+		size_t rows, cols;
 
-	// Constructor
-	flat2DArray(size_t r, size_t c) :  data(r*c), rows(r), cols(c) {}
+		// Constructor
+		flat2DArray(size_t r, size_t c) :  data(r*c), rows(r), cols(c) {}
+		flat2DArray() :  data(0), rows(0), cols(0) {}
 
-	// index operator
-	T &operator()(size_t i, size_t j) {
-		return data[(i * cols) + j];
-	}
-	const T &operator()(size_t i, size_t j) const {
-		return data[(i * cols) + j];
-	}
+		// index operator
+		T &operator()(size_t i, size_t j) {
+			return data[(i * cols) + j];
+		}
+		const T &operator()(size_t i, size_t j) const {
+			return data[(i * cols) + j];
+		}
+
+		void init(size_t r, size_t c) {
+			data.reserve(r * c);
+			rows = r;
+			cols = c;
+		}
 };
 
 template <typename T>

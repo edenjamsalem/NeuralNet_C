@@ -2,26 +2,56 @@
 
 Network::Network(const std::vector<size_t> &layer_sizes) : 
 	num_layers(layer_sizes.size()), 
-	max_len(*std::max_element(layer_sizes.begin() + 1, layer_sizes.end())), //
-	
+	max_layer_len(*std::max_element(layer_sizes.begin() + 1, layer_sizes.end())),
+	layer_sizes(layer_sizes),
+
 	input_layer(layer_sizes[0]), 
-	input_weights(layer_sizes[1], layer_sizes[0]),
-	
-	network(num_layers - 1, max_len),
-	weights(num_layers - 2, max_len, max_len)
+	network(num_layers, max_layer_len)
 {
-	// seed random values for weights 
-	for (size_t i = 0; i < input_weights.rows; i++) {
-		for (size_t j = 0; j < input_weights.cols; j++) {
-			input_weights(i, j) = gen_random_double();
-		}
-	}
-	// start at i=2 as indexes backward and layer 1->2 handled separately ^^
-	for (size_t i = 2; i < num_layers; i++) {
-		for (size_t j = 0; j < layer_sizes[i]; j++) {
-			for (size_t k = 0; k < layer_sizes[i - 1]; k++) {
-				weights(i - 1, j, k) = gen_random_double();
+	// init weights
+	for (size_t layer = 0; layer < this->num_layers - 1; layer++) {
+		weights[layer].init(layer_sizes[layer], layer_sizes[layer + 1]);
+
+		// seed random values
+		for (size_t from = 0; from < this->layer_sizes[layer]; from++) {
+			for (size_t to = 0; to < this->layer_sizes[layer + 1]; to++) {
+				this->weights[layer](from, to) = gen_random_double();
 			}
 		}
 	}
+}
+
+void Network::setInputs(std::vector<double> image) {
+	this->input_layer = std::move(image);
+}
+
+void Network::feedForward() {
+	// handle input layer
+	for (size_t to = 0; to < this->layer_sizes[1]; to++) {
+		double z = 0;
+		for (size_t from = 0; from < this->layer_sizes[0]; from++) {
+			double signal = this->input_layer[from];
+			z += this->weights[0](from, to) * signal;
+		}
+		double bias = this->network(0, to).bias;
+		this->network(0, to).signal = sigmoid(z + bias);
+	}
+
+	// handle rest of network
+	for (size_t layer = 1; layer < num_layers - 1; layer++) {
+		for (size_t to = 0; to < this->layer_sizes[layer + 1]; to++) {
+			double z = 0;
+			for (size_t from = 0; from < this->layer_sizes[layer]; from++) {
+				z += this->weights[layer](from, to) * this->network(layer, from).signal;
+			}
+			double bias = this->network(layer, to).bias;
+			this->network(layer, to).signal = sigmoid(z + bias);
+		}
+	}
+}
+
+void Network::trainOn(std::vector<double> image) {
+	this->setInputs(image);
+	this->feedForward();
+	// this->backProp();
 }
