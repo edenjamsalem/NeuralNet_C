@@ -18,7 +18,7 @@ class Network {
 		size_t max_layer_len; 	// excluding input layer 
 		std::vector<size_t> layer_sizes;
 
-		// input values handled separately as they are large
+		// input values handled separately
 		std::vector<double> input_layer;
 		
 		// rest of network is here
@@ -34,6 +34,6 @@ class Network {
 		void setInputs(std::vector<double> image);
 		void trainOn(std::vector<double> image);
 		void feedForward();
-
+		void backProp();
 };
 
