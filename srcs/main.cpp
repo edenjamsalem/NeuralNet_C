@@ -21,12 +21,7 @@ int main() {
 	Network network({input_size, 16, 16, 10});
 	std::cout << "Network created!\n";
 
-	// train network on each image in the training set
-	for (size_t i = 0; i < dataset.training_images.size(); i++) {
-		auto image = dataset.training_images[i];
-		auto expected_output = dataset.training_labels[i];
-		
-		network.trainOn(image, expected_output);
-	}
+	// Apply Mini-batch Stochastic Gradient Descent algorithm to training data
+	network.SGD(dataset);
 	std::cout << "Finished training set of " << dataset.training_images.size() << " images!\n";
 }

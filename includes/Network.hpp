@@ -1,9 +1,11 @@
 #pragma once
+#include "mnist/include/mnist/mnist_reader.hpp"
 #include "flatArrays.tpp"
 #include "utils.hpp"
 
 #ifndef NETWORK_HPP
 	#define MAX_LAYERS 4
+	#define MINI_BATCH_SIZE 64
 #endif
 
 struct Neuron {
@@ -31,8 +33,9 @@ class Network {
 		Network(const std::vector<size_t> &layer_sizes);
 		// ~Network();
 
-		void setInputs(std::vector<float> image);
+		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
 		void trainOn(std::vector<float> image, uint8_t expected_ouput);
+		void setInputs(std::vector<float> image);
 		void feedForward();
 		void backProp();
 };
