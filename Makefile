@@ -1,6 +1,6 @@
 NAME = NeuralNet_CPP
 CC = g++
-FLAGS = -Wall -Werror -Wextra -std=c++17
+FLAGS = -Wall -Werror -Wextra -std=c++17 -I./includes/Eigen
 
 SRCDIR = ./srcs
 SRCS = 	$(SRCDIR)/main.cpp	\

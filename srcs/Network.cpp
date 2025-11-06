@@ -68,6 +68,7 @@ void Network::feedForward() {
 }
 
 size_t Network::calculateCost() {
+	// for (size_t i = 0;)
 	return (0);
 }
 
