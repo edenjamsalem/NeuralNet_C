@@ -1,5 +1,5 @@
 #pragma once
 
-double gen_random_double();
-double sigmoid(double x);
-double ReLU(double x);
+float gen_random_double();
+float sigmoid(float x);
+float ReLU(float x);

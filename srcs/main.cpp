@@ -10,15 +10,11 @@
 */
 
 int main() {
-	auto dataset = mnist::read_dataset<std::vector, std::vector, double, uint8_t>("./includes/mnist");
+	auto dataset = mnist::read_dataset<std::vector, std::vector, float, uint8_t>("./includes/mnist");
 	std::cout << "Data imported!\n";
 	
 	// normalize grayscale 0.0-255.0 --> 0.0-1.0
-	for (auto &image : dataset.training_images) {
-		for (auto &pixel : image) {
-			pixel /= 255.0;
-		}
-	}
+	mnist::normalize_dataset(dataset);
 	
 	// create network
 	size_t input_size = dataset.test_images[0].size(); // assumes inputs size is the same for all images
@@ -26,8 +22,11 @@ int main() {
 	std::cout << "Network created!\n";
 
 	// train network on each image in the training set
-	for (auto &image : dataset.training_images) {
-		network.trainOn(image);
+	for (size_t i = 0; i < dataset.training_images.size(); i++) {
+		auto image = dataset.training_images[i];
+		auto expected_output = dataset.training_labels[i];
+		
+		network.trainOn(image, expected_output);
 	}
-	std::cout << "Finished training set!\n";
+	std::cout << "Finished training set of " << dataset.training_images.size() << " images!\n";
 }

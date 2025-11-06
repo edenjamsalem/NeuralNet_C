@@ -7,8 +7,8 @@
 #endif
 
 struct Neuron {
-	double bias;
-	double signal;
+	float bias;
+	float signal;
     Neuron() : bias(gen_random_double()), signal(0.0) {}
 };
 
@@ -19,11 +19,11 @@ class Network {
 		std::vector<size_t> layer_sizes;
 
 		// input values handled separately
-		std::vector<double> input_layer;
+		std::vector<float> input_layer;
 		
 		// rest of network is here
 		flat2DArray<Neuron> network;
-		flat2DArray<double> weights[MAX_LAYERS];
+		flat2DArray<float> weights[MAX_LAYERS];
 
 	public: 
 		// Constructors
@@ -31,8 +31,8 @@ class Network {
 		Network(const std::vector<size_t> &layer_sizes);
 		// ~Network();
 
-		void setInputs(std::vector<double> image);
-		void trainOn(std::vector<double> image);
+		void setInputs(std::vector<float> image);
+		void trainOn(std::vector<float> image, uint8_t expected_ouput);
 		void feedForward();
 		void backProp();
 };
