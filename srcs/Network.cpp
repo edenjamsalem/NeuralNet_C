@@ -4,7 +4,6 @@ Network::Network(const std::vector<size_t> &layer_sizes) :
 	num_layers(layer_sizes.size() - 1), 
 	max_layer_len(*std::max_element(layer_sizes.begin() + 1, layer_sizes.end())),
 	layer_sizes(layer_sizes),
-
 	input_layer(layer_sizes[0]),
 	network(num_layers)
 {
@@ -22,36 +21,30 @@ Network::Network(const std::vector<size_t> &layer_sizes) :
 	}
 }
 
-void Network::setInputs(std::vector<float> image) {
-	this->input_layer = Eigen::VectorXf::Map(image.data(), image.size());
-}
-
 void Network::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
 	// vectorize expected output
 	Eigen::VectorXf expected_output(this->layer_sizes.back());
+	size_t currentBatchCost = 0;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); i++) {
 		expected_output.setZero();
 		expected_output[dataset.training_labels[i]] = 1.0f;
 
-		this->trainOn(dataset.training_images[i], expected_output);
+		this->setInputs(dataset.training_images[i]);
+		this->feedForward();
+		currentBatchCost += this->calculateCost(expected_output);
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % MINI_BATCH_SIZE == 0)) {
-			// this->adjust_parameters();
+			this->adjust_parameters(currentBatchCost);
+			currentBatchCost = 0;
 		}
 	}
 }
 
-void Network::trainOn(std::vector<float> image, Eigen::VectorXf expected_ouput) {
-	(void)expected_ouput;
-
-	this->setInputs(image);
-	this->feedForward();
-	size_t cost = this->calculateCost();
-	(void)cost;
-	// this->backProp();
+void Network::setInputs(std::vector<float> image) {
+	this->input_layer = Eigen::VectorXf::Map(image.data(), image.size());
 }
 
 void Network::feedForward() {
@@ -64,9 +57,15 @@ void Network::feedForward() {
     }	
 }
 
-size_t Network::calculateCost() {
-	// for (size_t i = 0;)
-	return (0);
+size_t Network::calculateCost(Eigen::VectorXf expected_ouput) {
+	Eigen::VectorXf output = this->network.back().activations;
+	Eigen::VectorXf diff = output - expected_ouput;
+	float cost = diff.squaredNorm() / diff.size();
+	return (cost);
+}
+
+void Network::adjust_parameters(size_t currentBatchCost) {
+	(void)currentBatchCost;
 }
 
 void Network::backProp() {

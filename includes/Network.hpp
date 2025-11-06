@@ -18,7 +18,7 @@ struct Layer {
 class Network {
 	private:
 		size_t num_layers;
-		size_t max_layer_len; 	// excluding input layer 
+		size_t max_layer_len; 	// excluding input layer
 		std::vector<size_t> layer_sizes;
 
 		Eigen::VectorXf input_layer;
@@ -31,9 +31,9 @@ class Network {
 		// ~Network();
 
 		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
-		void trainOn(std::vector<float> image, Eigen::VectorXf expected_ouput);
 		void setInputs(std::vector<float> image);
 		void feedForward();
-		size_t calculateCost();
+		size_t calculateCost(Eigen::VectorXf expected_ouput);
+		void adjust_parameters(size_t currentBatchCost);
 		void backProp();
 };
