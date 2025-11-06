@@ -28,7 +28,10 @@ void Network::setInputs(std::vector<float> image) {
 void Network::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); i++) {
-		auto expected_output = dataset.training_labels[i];
+		// vectorize expected output
+		float expected_output[10] = {};		// maybe make dynamic later ??
+		expected_output[dataset.training_labels[i]] = 1.0f;
+
 		this->trainOn(dataset.training_images[i], expected_output);
 
 		// adjust parameters after each mini-batch
@@ -38,11 +41,13 @@ void Network::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float,
 	}
 }
 
-void Network::trainOn(std::vector<float> image, uint8_t expected_ouput) {
+void Network::trainOn(std::vector<float> image, float expected_ouput[10]) {
 	(void)expected_ouput;
 
 	this->setInputs(image);
 	this->feedForward();
+	size_t cost = this->calculateCost();
+	(void)cost;
 	// this->backProp();
 }
 
@@ -60,6 +65,10 @@ void Network::feedForward() {
 			this->network(layer, to).signal = sigmoid(z + bias);
 		}
 	}
+}
+
+size_t Network::calculateCost() {
+	return (0);
 }
 
 void Network::backProp() {

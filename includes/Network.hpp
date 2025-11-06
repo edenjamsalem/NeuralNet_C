@@ -34,8 +34,9 @@ class Network {
 		// ~Network();
 
 		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
-		void trainOn(std::vector<float> image, uint8_t expected_ouput);
+		void trainOn(std::vector<float> image, float expected_ouput[10]);
 		void setInputs(std::vector<float> image);
 		void feedForward();
+		size_t calculateCost();
 		void backProp();
 };
