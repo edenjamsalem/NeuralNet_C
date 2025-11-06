@@ -22,7 +22,7 @@ class Network {
 		std::vector<size_t> layer_sizes;
 
 		Eigen::VectorXf input_layer;
-		Layer network[MAX_LAYERS];
+		std::vector<Layer> network;
 
 	public: 
 		// Constructors
@@ -31,7 +31,7 @@ class Network {
 		// ~Network();
 
 		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
-		void trainOn(std::vector<float> image, Eigen::Vector<float, 10> expected_ouput);
+		void trainOn(std::vector<float> image, Eigen::VectorXf expected_ouput);
 		void setInputs(std::vector<float> image);
 		void feedForward();
 		size_t calculateCost();

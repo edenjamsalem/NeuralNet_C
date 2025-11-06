@@ -5,7 +5,8 @@ Network::Network(const std::vector<size_t> &layer_sizes) :
 	max_layer_len(*std::max_element(layer_sizes.begin() + 1, layer_sizes.end())),
 	layer_sizes(layer_sizes),
 
-	input_layer(layer_sizes[0])
+	input_layer(layer_sizes[0]),
+	network(num_layers)
 {
 	for (size_t layer = 0; layer < this->num_layers; layer++) {
 		size_t rows = layer_sizes[layer + 1];
@@ -26,10 +27,11 @@ void Network::setInputs(std::vector<float> image) {
 }
 
 void Network::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
+	// vectorize expected output
+	Eigen::VectorXf expected_output(this->layer_sizes.back());
+
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); i++) {
-		// vectorize expected output
-		Eigen::Matrix<float, 10, 1> expected_output; 	// maybe make dynamic later ??
 		expected_output.setZero();
 		expected_output[dataset.training_labels[i]] = 1.0f;
 
@@ -42,7 +44,7 @@ void Network::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float,
 	}
 }
 
-void Network::trainOn(std::vector<float> image, Eigen::Vector<float, 10> expected_ouput) {
+void Network::trainOn(std::vector<float> image, Eigen::VectorXf expected_ouput) {
 	(void)expected_ouput;
 
 	this->setInputs(image);
