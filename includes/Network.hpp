@@ -36,4 +36,3 @@ class Network {
 		void feedForward();
 		void backProp();
 };
-

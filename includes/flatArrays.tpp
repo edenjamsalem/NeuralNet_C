@@ -27,20 +27,29 @@ class flat2DArray {
 };
 
 template <typename T>
-struct flat3DArray {
-	std::vector<T> data;
-	size_t rows, cols, depths;
+class flat3DArray {
+	public:
+		std::vector<T> data;
+		size_t rows, cols, depths;
 
-	// Constructor
-	flat3DArray(size_t r, size_t c, size_t d) :  data(r*c*d), rows(r), cols(c), depths(d) {}
+		// Constructor
+		flat3DArray(size_t r, size_t c, size_t d) :  data(r*c*d), rows(r), cols(c), depths(d) {}
+		flat3DArray() :  data(0), rows(0), cols(0), depths(0) {}
 
-	// index operator
-	T &operator()(size_t i, size_t j, size_t k) {
-		return data[(i * cols * depths) + (j * depths) + k];
-	}
-	const T &operator()(size_t i, size_t j, size_t k) const {
-		return data[(i * cols * depths) + (j * depths) + k];
-	}
+		// index operator
+		T &operator()(size_t i, size_t j, size_t k) {
+			return data[(i * cols * depths) + (j * depths) + k];
+		}
+		const T &operator()(size_t i, size_t j, size_t k) const {
+			return data[(i * cols * depths) + (j * depths) + k];
+		}
+
+		void init(size_t r, size_t c, size_t d) {
+			data.reserve(r * c * d);
+			rows = r;
+			cols = c;
+			depths = d;
+		}
 };
 
 template <typename T>
