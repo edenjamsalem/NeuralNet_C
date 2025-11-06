@@ -19,7 +19,7 @@ class flat2DArray {
 			return data[(i * cols) + j];
 		}
 
-		void init(size_t r, size_t c) {
+		void resize(size_t r, size_t c) {
 			data.reserve(r * c);
 			rows = r;
 			cols = c;
@@ -44,7 +44,7 @@ class flat3DArray {
 			return data[(i * cols * depths) + (j * depths) + k];
 		}
 
-		void init(size_t r, size_t c, size_t d) {
+		void resize(size_t r, size_t c, size_t d) {
 			data.reserve(r * c * d);
 			rows = r;
 			cols = c;

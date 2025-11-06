@@ -13,7 +13,7 @@ int main() {
 	auto dataset = mnist::read_dataset<std::vector, std::vector, float, uint8_t>("./includes/mnist");
 	std::cout << "Data imported!\n";
 	
-	// normalize grayscale 0.0-255.0 --> 0.0-1.0
+	// grayscale 0.0-255.0 --> 0.0-1.0
 	mnist::normalize_dataset(dataset);
 	
 	// create network

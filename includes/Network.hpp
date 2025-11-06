@@ -2,6 +2,7 @@
 #include "mnist/include/mnist/mnist_reader.hpp"
 #include "flatArrays.tpp"
 #include "utils.hpp"
+#include "Eigen/Dense"
 
 #ifndef NETWORK_HPP
 	#define MAX_LAYERS 4
@@ -20,12 +21,10 @@ class Network {
 		size_t max_layer_len; 	// excluding input layer 
 		std::vector<size_t> layer_sizes;
 
-		// input values handled separately
-		std::vector<float> input_layer;
-		
-		// rest of network is here
-		flat2DArray<Neuron> network;
-		flat2DArray<float> weights[MAX_LAYERS];
+		Eigen::VectorXf input_layer;
+		Eigen::VectorXf biases[MAX_LAYERS];
+		Eigen::VectorXf activations[MAX_LAYERS];
+		Eigen::MatrixXf weights[MAX_LAYERS];
 
 	public: 
 		// Constructors
@@ -34,7 +33,7 @@ class Network {
 		// ~Network();
 
 		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
-		void trainOn(std::vector<float> image, float expected_ouput[10]);
+		void trainOn(std::vector<float> image, Eigen::Vector<float, 10> expected_ouput);
 		void setInputs(std::vector<float> image);
 		void feedForward();
 		size_t calculateCost();
