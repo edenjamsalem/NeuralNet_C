@@ -4,15 +4,15 @@
 #include "utils.hpp"
 #include "Eigen/Dense"
 
-#ifndef NETWORK_HPP
+#ifndef HEADER_HPP
 	#define MAX_LAYERS 4
 	#define MINI_BATCH_SIZE 64
 #endif
 
-struct Neuron {
-	float bias;
-	float signal;
-    Neuron() : bias(gen_random_double()), signal(0.0) {}
+struct Layer {
+	Eigen::VectorXf biases;
+	Eigen::VectorXf activations;
+	Eigen::MatrixXf weights;
 };
 
 class Network {
@@ -22,9 +22,7 @@ class Network {
 		std::vector<size_t> layer_sizes;
 
 		Eigen::VectorXf input_layer;
-		Eigen::VectorXf biases[MAX_LAYERS];
-		Eigen::VectorXf activations[MAX_LAYERS];
-		Eigen::MatrixXf weights[MAX_LAYERS];
+		Layer network[MAX_LAYERS];
 
 	public: 
 		// Constructors
