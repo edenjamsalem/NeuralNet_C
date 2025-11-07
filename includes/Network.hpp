@@ -1,24 +1,30 @@
 #pragma once
 #include "mnist/include/mnist/mnist_reader.hpp"
-#include "flatArrays.tpp"
 #include "utils.hpp"
 #include "Eigen/Dense"
 
-#ifndef HEADER_HPP
-	// #define MINI_BATCH_SIZE 64
-#endif
+struct LayerView {
+	Eigen::Map<Eigen::MatrixXf> weights;
+	Eigen::Map<Eigen::VectorXf> biases;
+    Eigen::Map<Eigen::VectorXf> activations;
 
-struct Layer {
-	Eigen::VectorXf biases;
-	Eigen::VectorXf activations;
-	Eigen::MatrixXf weights;
+	LayerView(float *start, size_t r, size_t c) :
+		weights(start, r, c),
+		biases(start + (r * c), r),
+		activations(start + (r * c) + r, r) 
+	{
+		weights.setRandom();
+		biases.setRandom();
+		activations.setZero();
+	}
 };
 
 class NeuralNetwork {
 	private:
 		size_t num_layers;
 		std::vector<size_t> layer_sizes;
-		std::vector<Layer> network;
+		std::unique_ptr<float[]> buffer;
+		std::vector<LayerView> network;
 
 	public: 
 		// Constructors
@@ -28,7 +34,6 @@ class NeuralNetwork {
 		// Methods
 		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
 		void feedForward(std::vector<float> image);
-		float calculateCost(Eigen::VectorXf expected_ouput);
 		void adjust_parameters(size_t currentBatchCost);
 		void backProp();
 };

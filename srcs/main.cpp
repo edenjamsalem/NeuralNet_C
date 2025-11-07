@@ -16,7 +16,7 @@ int main() {
 	// grayscale 0.0-255.0 --> 0.0-1.0
 	mnist::normalize_dataset(dataset);
 	
-	// create network
+	// Create network
 	size_t input_size = dataset.test_images[0].size(); // assumes inputs size is the same for all images
 	NeuralNetwork network({input_size, 16, 16, 10});
 	std::cout << "Network created!\n";
