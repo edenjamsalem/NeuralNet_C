@@ -1,10 +1,9 @@
 #include "../includes/header.hpp"
 
-Network::Network(const std::vector<size_t> &layer_sizes) : 
+NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) : 
 	num_layers(layer_sizes.size() - 1), 
 	max_layer_len(*std::max_element(layer_sizes.begin() + 1, layer_sizes.end())),
 	layer_sizes(layer_sizes),
-	input_layer(layer_sizes[0]),
 	network(num_layers)
 {
 	for (size_t layer = 0; layer < this->num_layers; layer++) {
@@ -21,34 +20,30 @@ Network::Network(const std::vector<size_t> &layer_sizes) :
 	}
 }
 
-void Network::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
-	// vectorize expected output
+void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
 	Eigen::VectorXf expected_output(this->layer_sizes.back());
-	size_t currentBatchCost = 0;
+	float currentBatchCost = 0.0f;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); i++) {
+		this->feedForward(dataset.training_images[i]);
+
+		// vectorize exepected output && calculate cost 
 		expected_output.setZero();
 		expected_output[dataset.training_labels[i]] = 1.0f;
-
-		this->setInputs(dataset.training_images[i]);
-		this->feedForward();
 		currentBatchCost += this->calculateCost(expected_output);
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % MINI_BATCH_SIZE == 0)) {
-			this->adjust_parameters(currentBatchCost);
+			this->adjust_parameters(currentBatchCost / MINI_BATCH_SIZE);
 			currentBatchCost = 0;
 		}
 	}
 }
 
-void Network::setInputs(std::vector<float> image) {
-	this->input_layer = Eigen::VectorXf::Map(image.data(), image.size());
-}
-
-void Network::feedForward() {
-	Eigen::VectorXf a = this->input_layer; // a ==> current layer activations
+void NeuralNetwork::feedForward(std::vector<float> image) {
+	// a ==> current layer activations
+	Eigen::VectorXf a = Eigen::VectorXf::Map(image.data(), image.size());
 
     for (size_t layer = 0; layer < this->num_layers; ++layer) {
         Eigen::VectorXf z = (this->network[layer].weights * a) + this->network[layer].biases;
@@ -57,17 +52,17 @@ void Network::feedForward() {
     }	
 }
 
-size_t Network::calculateCost(Eigen::VectorXf expected_ouput) {
+float NeuralNetwork::calculateCost(Eigen::VectorXf expected_ouput) {
 	Eigen::VectorXf output = this->network.back().activations;
 	Eigen::VectorXf diff = output - expected_ouput;
 	float cost = diff.squaredNorm() / diff.size();
 	return (cost);
 }
 
-void Network::adjust_parameters(size_t currentBatchCost) {
+void NeuralNetwork::adjust_parameters(size_t currentBatchCost) {
 	(void)currentBatchCost;
 }
 
-void Network::backProp() {
+void NeuralNetwork::backProp() {
 
 }
