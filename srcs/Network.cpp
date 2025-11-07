@@ -48,15 +48,14 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 	}
 }
 
-void NeuralNetwork::feedForward(const std::vector<float> image) {
-	// a ==> current layer activations
-	Eigen::VectorXf a = Eigen::VectorXf::Map(image.data(), image.size());
+void NeuralNetwork::feedForward(const std::vector<float> &image) {
+	Eigen::VectorXf activations = Eigen::VectorXf::Map(image.data(), image.size());
 
-    for (size_t layer = 0; layer < this->network.size(); ++layer) {
-        Eigen::VectorXf z = (this->network[layer].weights * a) + this->network[layer].biases;
-        a = z.unaryExpr(&sigmoid);
-        this->network[layer].activations = a;
-    }	
+    for (auto &layer : this->network) {
+        Eigen::VectorXf z = (layer.weights * activations) + layer.biases;
+        layer.activations = z.unaryExpr(&sigmoid);
+        activations = layer.activations;
+    }
 }
 
 void NeuralNetwork::adjust_parameters(size_t currentBatchCost) {

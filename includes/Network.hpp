@@ -28,7 +28,7 @@ class NeuralNetwork {
 		std::vector<LayerView> network;
 
 		// Methods
-		void feedForward(std::vector<float> image);
+		void feedForward(const std::vector<float> &image);
 		void adjust_parameters(size_t currentBatchCost);
 		void backProp();
 
@@ -39,5 +39,4 @@ class NeuralNetwork {
 
 		// Methods
 		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
-
 };
