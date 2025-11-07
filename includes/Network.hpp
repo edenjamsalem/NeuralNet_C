@@ -5,8 +5,7 @@
 #include "Eigen/Dense"
 
 #ifndef HEADER_HPP
-	#define MAX_LAYERS 4
-	#define MINI_BATCH_SIZE 64
+	// #define MINI_BATCH_SIZE 64
 #endif
 
 struct Layer {
@@ -18,7 +17,6 @@ struct Layer {
 class NeuralNetwork {
 	private:
 		size_t num_layers;
-		size_t max_layer_len; 	// excluding input layer
 		std::vector<size_t> layer_sizes;
 		std::vector<Layer> network;
 

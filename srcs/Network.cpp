@@ -2,7 +2,6 @@
 
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) : 
 	num_layers(layer_sizes.size() - 1), 
-	max_layer_len(*std::max_element(layer_sizes.begin() + 1, layer_sizes.end())),
 	layer_sizes(layer_sizes),
 	network(num_layers)
 {
@@ -23,6 +22,7 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) :
 void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
 	Eigen::VectorXf expected_output(this->layer_sizes.back());
 	float currentBatchCost = 0.0f;
+	size_t mini_batch_size = 64;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); i++) {
@@ -34,14 +34,14 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 		currentBatchCost += this->calculateCost(expected_output);
 
 		// adjust parameters after each mini-batch
-		if ((i > 1 && i % MINI_BATCH_SIZE == 0)) {
-			this->adjust_parameters(currentBatchCost / MINI_BATCH_SIZE);
+		if ((i > 1 && i % mini_batch_size == 0)) {
+			this->adjust_parameters(currentBatchCost / mini_batch_size);
 			currentBatchCost = 0;
 		}
 	}
 }
 
-void NeuralNetwork::feedForward(std::vector<float> image) {
+void NeuralNetwork::feedForward(const std::vector<float> image) {
 	// a ==> current layer activations
 	Eigen::VectorXf a = Eigen::VectorXf::Map(image.data(), image.size());
 
