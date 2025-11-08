@@ -29,7 +29,7 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) :
 void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
 	Eigen::VectorXf expected_output(this->layer_sizes.back());
 	float currentBatchCost = 0.0f;
-	size_t mini_batch_size = 64;
+	const size_t mini_batch_size = 64;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); i++) {

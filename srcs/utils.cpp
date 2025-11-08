@@ -14,7 +14,7 @@ float ReLU(float x) {
     return (x < 0.0 ? 0.0 : x);
 }
 
-float calculateCost(Eigen::VectorXf output, Eigen::VectorXf expected_ouput) {
+float calculateCost(const Eigen::VectorXf &output, const Eigen::VectorXf &expected_ouput) {
 	Eigen::VectorXf diff = output - expected_ouput;
 	float cost = diff.squaredNorm() / diff.size();
 	return (cost);

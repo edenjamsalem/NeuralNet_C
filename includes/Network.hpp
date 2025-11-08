@@ -12,11 +12,11 @@ struct LayerView {
 		weights(start, r, c),
 		biases(start + (r * c), r),
 		activations(start + (r * c) + r, r) 
-	{
-		weights.setRandom();
-		biases.setRandom();
-		activations.setZero();
-	}
+		{
+			weights.setRandom();
+			biases.setRandom();
+			activations.setZero();
+		}
 };
 
 class NeuralNetwork {
