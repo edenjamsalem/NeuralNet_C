@@ -4,18 +4,27 @@
 #include "Eigen/Dense"
 
 struct LayerView {
+	// view memory used for network
 	Eigen::Map<Eigen::MatrixXf> weights;
 	Eigen::Map<Eigen::VectorXf> biases;
     Eigen::Map<Eigen::VectorXf> activations;
 
+	// view of memory used for backProp gradients 
+	Eigen::Map<Eigen::MatrixXf> dW;
+    Eigen::Map<Eigen::VectorXf> db;
+
 	LayerView(float *start, size_t r, size_t c) :
 		weights(start, r, c),
 		biases(start + (r * c), r),
-		activations(start + (r * c) + r, r) 
+		activations(start + (r * c) + r, r) ,
+		dW(start + (r * c) + (2 * r), r, c),
+		db(start + (2 * r * c) + (2 * r), r)
 		{
 			weights.setRandom();
 			biases.setRandom();
 			activations.setZero();
+			dW.setZero();
+			db.setZero();
 		}
 };
 
@@ -29,8 +38,8 @@ class NeuralNetwork {
 
 		// Methods
 		void feedForward(const std::vector<float> &image);
-		void adjust_parameters(size_t currentBatchCost);
 		void backProp();
+		void adjustNetwork();
 
 	public: 
 		// Constructors
