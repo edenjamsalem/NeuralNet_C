@@ -47,7 +47,7 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % mini_batch_size == 0)) {
-			this->adjustNetwork();
+			this->adjustNetwork(mini_batch_size);
 			currentBatchCost = 0;
 		}
 	}
@@ -58,20 +58,31 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
 	Eigen::VectorXf activations = this->input_activations;
     
 	for (auto &layer : this->network) {
-        layer.activations = (layer.weights * activations) + layer.biases;
+        layer.activations.noalias() = (layer.weights * activations) + layer.biases;
         layer.activations = layer.activations.unaryExpr(&sigmoid);
         activations = layer.activations;
     }
 }
 
 void NeuralNetwork::backProp() {
-
+	for (size_t layer = this->layer_sizes.back(); layer > 0; --layer) { 
+		
+	}
 }
 
+void NeuralNetwork::adjustNetwork(const size_t mini_batch_size) {
 // η => learning rate (how large a step we take along our gradient)
-void NeuralNetwork::adjustNetwork() {
 	// const float η = 0.1f;
-	// for (size_t layer = this->layer_sizes.back(); layer > 0; --layer) {
-
-	// }
+	for (auto &layer : this->network) {
+     // average gradients for minibatch 
+	 layer.dW /= mini_batch_size; 
+	 layer.db /= mini_batch_size; 
+	 
+	 // apply changes to weights and biases 
+	 // ... 
+	 
+	 // reset dW and db for next batch 
+	 layer.dW.setZero(); 
+	 layer.db.setZero();
+    }
 }
