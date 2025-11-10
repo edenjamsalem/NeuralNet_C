@@ -1,7 +1,9 @@
 #include "../include/Network.hpp"
 
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) : 
-	input_activations(layout[0])
+	inputActivations(layout.front()),
+	expectedOutput(layout.back()),
+	miniBatchSize(32)
 {
 	// validate network size
 	if (layout.size() < 3) {
@@ -34,38 +36,34 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes)
 	: NeuralNetwork(static_cast<const std::vector<size_t>&>(layer_sizes)) 
 {}
 
-void NeuralNetwork::SGD(std::vector<std::vector<float>> training_data, std::vector<uint8_t> training_labels) {
-	Eigen::VectorXf expected_output(this->network.back().activations.size());
-	const size_t miniBatchSize = 32;
-
-	// Used to track improvement in network's accuracy on each batch
-	size_t batchNumber = 1;
+void NeuralNetwork::SGD(std::vector<std::vector<float>> trainingData, std::vector<uint8_t> trainingLabels) {
+	// Used to track network's improvement across batches
+	size_t batchNumber = 0;
 	float currentBatchCost = 0.0f;
 
 	// train network on each image in the dataset
-	for (size_t i = 0; i < training_data.size(); ++i) {
-		this->feedForward(training_data[i]);
+	for (size_t i = 0; i < trainingData.size(); ++i) {
+		this->feedForward(trainingData[i]);
 
 		// vectorize exepected output && calculate cost 
-		expected_output.setZero();
-		expected_output[training_labels[i]] = 1.0f;
-		currentBatchCost += calculateCost(this->network.back().activations, expected_output);
+		this->expectedOutput.setZero();
+		this->expectedOutput[trainingLabels[i]] = 1.0f;
+		currentBatchCost += calculateCost(this->network.back().activations, this->expectedOutput);
 
-		// backProp to calculate gradients for mini-batch
-		this->backProp(expected_output);
+		this->backProp();
 
 		// adjust parameters after each mini-batch
-		if ((i > 1 && i % miniBatchSize == 0) || i == training_data.size()) {
+		if ((i > 1 && i % this->miniBatchSize == 0) || i == trainingData.size()) {
 			std::cout << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
-			this->adjustNetwork(miniBatchSize);
+			this->adjustNetwork();
 			currentBatchCost = 0;
 		}
 	}
 }
 
 void NeuralNetwork::feedForward(const std::vector<float> &image) {
-	this->input_activations = Eigen::VectorXf(Eigen::Map<const Eigen::VectorXf>(image.data(), image.size()));
-	Eigen::VectorXf activations = this->input_activations;
+	this->inputActivations = Eigen::VectorXf(Eigen::Map<const Eigen::VectorXf>(image.data(), image.size()));
+	Eigen::VectorXf &activations = this->inputActivations;
     
 	for (auto &layer : this->network) {
         layer.activations.noalias() = (layer.weights * activations) + layer.biases;
@@ -74,13 +72,13 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
     }
 }
 
-void NeuralNetwork::backProp(Eigen::VectorXf &expected_output) {
+void NeuralNetwork::backProp() {
 	// calculate output delta (how much each node contributed to final cost)
-    Eigen::VectorXf delta = (this->network.back().activations - expected_output).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
+    Eigen::VectorXf delta = (this->network.back().activations - this->expectedOutput).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
 
 	for (size_t layer = this->network.size() - 1; layer > 0; --layer) {
 		// Previous activations: input image for first hidden layer
-		const Eigen::VectorXf &prev_activations = (layer == 0) ? this->input_activations : this->network[layer - 1].activations;
+		const Eigen::VectorXf &prev_activations = (layer == 0) ? this->inputActivations : this->network[layer - 1].activations;
 
 		// Accumulate gradients
 		this->network[layer].dW += delta * prev_activations.transpose();
@@ -92,14 +90,14 @@ void NeuralNetwork::backProp(Eigen::VectorXf &expected_output) {
 	}
 }
 
-void NeuralNetwork::adjustNetwork(const size_t mini_batch_size) {
+void NeuralNetwork::adjustNetwork() {
 	// η => learning rate (how large a step we take along our gradient)
 	const float η = 0.1f;
 
 	for (auto &layer : this->network) {
 		// apply changes to weights and biases 
-		layer.weights -= η * (layer.dW / mini_batch_size);
-		layer.biases -= η * (layer.db / mini_batch_size);
+		layer.weights -= η * (layer.dW / this->miniBatchSize);
+		layer.biases -= η * (layer.db / this->miniBatchSize);
 		
 		// reset dW and db for next batch 
 		layer.dW.setZero();
