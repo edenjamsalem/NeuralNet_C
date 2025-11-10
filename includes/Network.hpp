@@ -34,6 +34,7 @@ class NeuralNetwork {
 		size_t num_layers;
 		std::vector<size_t> layer_sizes;
 		std::unique_ptr<float[]> buffer;
+		Eigen::VectorXf input_activations;
 		std::vector<LayerView> network;
 
 		// Methods

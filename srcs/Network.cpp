@@ -2,7 +2,8 @@
 
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) : 
 	num_layers(layer_sizes.size() - 1),
-	layer_sizes(layer_sizes)
+	layer_sizes(layer_sizes),
+	input_activations(layer_sizes[0])
 {
 	// allocate network buffer
 	network.reserve(num_layers);
@@ -53,9 +54,10 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 }
 
 void NeuralNetwork::feedForward(const std::vector<float> &image) {
-	Eigen::VectorXf activations = Eigen::VectorXf::Map(image.data(), image.size());
-
-    for (auto &layer : this->network) {
+	this->input_activations = Eigen::VectorXf::Map(image.data(), image.size());
+	Eigen::VectorXf activations = this->input_activations;
+    
+	for (auto &layer : this->network) {
         layer.activations = (layer.weights * activations) + layer.biases;
         layer.activations = layer.activations.unaryExpr(&sigmoid);
         activations = layer.activations;
