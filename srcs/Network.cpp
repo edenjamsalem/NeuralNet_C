@@ -5,6 +5,11 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) :
 	layer_sizes(layer_sizes),
 	input_activations(layer_sizes[0])
 {
+	// validate network size
+	if (layer_sizes.size() < 3) {
+		throw std::invalid_argument("Network must have at least 1 hidden layer.");
+	}
+
 	// allocate network buffer
 	network.reserve(num_layers);
 	size_t total_size = 0;
