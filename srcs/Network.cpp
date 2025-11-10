@@ -29,9 +29,11 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) :
 
 void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
 	Eigen::VectorXf expected_output(this->layer_sizes.back());
+	const size_t miniBatchSize = 32;
+
+	// Used to track improvement in network's accuracy on each batch
 	size_t batchNumber = 1;
-	float currentBatchCost = 0.0f; // only used to track improvements in network's accuracy 
-	const size_t miniBatchSize = 16;
+	float currentBatchCost = 0.0f;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); ++i) {
@@ -47,8 +49,8 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % miniBatchSize == 0)) {
-			this->adjustNetwork(miniBatchSize);
 			std::cout << "Mini-batch " << batchNumber << " cost: " << currentBatchCost / miniBatchSize << "\n";
+			this->adjustNetwork(miniBatchSize);
 			currentBatchCost = 0;
 			batchNumber++;
 		}
@@ -67,27 +69,20 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
 }
 
 void NeuralNetwork::backProp(Eigen::VectorXf &expected_output) {
-	size_t layer = this->num_layers - 1;
-
 	// calculate output delta (how much each node contributed to final cost)
-    Eigen::VectorXf delta = (this->network[layer].activations - expected_output).cwiseProduct(this->network[layer].activations.unaryExpr(&sigmoidPrime));
+    Eigen::VectorXf delta = (this->network.back().activations - expected_output).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
 
-    // Accumulate gradient for output layer
-    this->network[layer].dW += delta * this->network[layer - 1].activations.transpose();
-    this->network[layer].db += delta;
-
-	while (layer > 0) {
-		--layer;
-		// δᶩ = (Wᵗ δˡ⁺¹) ⊙ σ'(aᶩ)
-		Eigen::VectorXf sp = this->network[layer].activations.unaryExpr(&sigmoidPrime);
-		delta = (this->network[layer + 1].weights.transpose() * delta).cwiseProduct(sp);
-
+	for (size_t layer = this->num_layers - 1; layer > 0; --layer) {
 		// Previous activations: input image for first hidden layer
 		const Eigen::VectorXf &prev_activations = (layer == 0) ? this->input_activations : this->network[layer - 1].activations;
 
 		// Accumulate gradients
 		this->network[layer].dW += delta * prev_activations.transpose();
 		this->network[layer].db += delta;
+
+		// δᶩ = (Wᵗ δˡ⁺¹) ⊙ σ'(aᶩ)
+		Eigen::VectorXf sp = prev_activations.unaryExpr(&sigmoidPrime);
+		delta = (this->network[layer].weights.transpose() * delta).cwiseProduct(sp);
 	}
 }
 
