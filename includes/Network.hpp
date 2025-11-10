@@ -48,5 +48,5 @@ class NeuralNetwork {
 		NeuralNetwork(const std::vector<size_t> &layer_sizes);
 
 		// Methods
-		void SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset);
+		void SGD(std::vector<std::vector<float>> training_data, std::vector<uint8_t> training_labels);
 };

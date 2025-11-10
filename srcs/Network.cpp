@@ -32,7 +32,11 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) :
 	}
 }
 
-void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
+NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes) 
+	: NeuralNetwork(static_cast<const std::vector<size_t>&>(layer_sizes)) 
+{}
+
+void NeuralNetwork::SGD(std::vector<std::vector<float>> training_data, std::vector<uint8_t> training_labels) {
 	Eigen::VectorXf expected_output(this->layer_sizes.back());
 	const size_t miniBatchSize = 32;
 
@@ -41,23 +45,22 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 	float currentBatchCost = 0.0f;
 
 	// train network on each image in the dataset
-	for (size_t i = 0; i < dataset.training_images.size(); ++i) {
-		this->feedForward(dataset.training_images[i]);
+	for (size_t i = 0; i < training_data.size(); ++i) {
+		this->feedForward(training_data[i]);
 
 		// vectorize exepected output && calculate cost 
 		expected_output.setZero();
-		expected_output[dataset.training_labels[i]] = 1.0f;
+		expected_output[training_labels[i]] = 1.0f;
 		currentBatchCost += calculateCost(this->network.back().activations, expected_output);
 
 		// backProp to calculate gradients for mini-batch
 		this->backProp(expected_output);
 
 		// adjust parameters after each mini-batch
-		if ((i > 1 && i % miniBatchSize == 0)) {
-			std::cout << "Mini-batch " << batchNumber << " cost: " << currentBatchCost / miniBatchSize << "\n";
+		if ((i > 1 && i % miniBatchSize == 0) || i == training_data.size()) {
+			std::cout << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
 			this->adjustNetwork(miniBatchSize);
 			currentBatchCost = 0;
-			batchNumber++;
 		}
 	}
 }

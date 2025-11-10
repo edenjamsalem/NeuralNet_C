@@ -22,6 +22,6 @@ int main() {
 	std::cout << "Network created!\n";
 
 	// Apply Mini-batch Stochastic Gradient Descent algorithm to training data
-	network.SGD(dataset);
+	network.SGD(dataset.training_images, dataset.training_labels);
 	std::cout << "Finished training set of " << dataset.training_images.size() << " images!\n";
 }
