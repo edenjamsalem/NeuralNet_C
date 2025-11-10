@@ -1,31 +1,29 @@
 #include "../include/Network.hpp"
 
-NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) : 
-	num_layers(layer_sizes.size() - 1),
-	layer_sizes(layer_sizes),
-	input_activations(layer_sizes[0])
+NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) : 
+	input_activations(layout[0])
 {
 	// validate network size
-	if (layer_sizes.size() < 3) {
+	if (layout.size() < 3) {
 		throw std::invalid_argument("Network must have at least 1 hidden layer.");
 	}
 
 	// allocate network buffer
-	network.reserve(num_layers);
+	network.reserve(layout.size() - 1);
 	size_t total_size = 0;
 
-	for (size_t layer = 0; layer < num_layers; ++layer) {
-		size_t rows = this->layer_sizes[layer + 1];
-		size_t cols = this->layer_sizes[layer];
+	for (size_t layer = 0; layer < layout.size() - 1; ++layer) {
+		size_t rows = layout[layer + 1];
+		size_t cols = layout[layer];
 		total_size += (2 * rows * cols) + (3 * rows);
 	}
 	buffer = std::make_unique<float[]>(total_size);
 
 	// assign map views of each layer
 	float *start = this->buffer.get();
-	for (size_t layer = 0; layer < num_layers; ++layer) {
-		size_t rows = this->layer_sizes[layer + 1];
-		size_t cols = this->layer_sizes[layer];
+	for (size_t layer = 0; layer < layout.size() - 1; ++layer) {
+		size_t rows = layout[layer + 1];
+		size_t cols = layout[layer];
 
 		network.emplace_back(LayerView(start, rows, cols));
 		start += (2 * rows * cols) + (3 * rows);
@@ -37,7 +35,7 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes)
 {}
 
 void NeuralNetwork::SGD(std::vector<std::vector<float>> training_data, std::vector<uint8_t> training_labels) {
-	Eigen::VectorXf expected_output(this->layer_sizes.back());
+	Eigen::VectorXf expected_output(this->network.back().activations.size());
 	const size_t miniBatchSize = 32;
 
 	// Used to track improvement in network's accuracy on each batch
@@ -80,7 +78,7 @@ void NeuralNetwork::backProp(Eigen::VectorXf &expected_output) {
 	// calculate output delta (how much each node contributed to final cost)
     Eigen::VectorXf delta = (this->network.back().activations - expected_output).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
 
-	for (size_t layer = this->num_layers - 1; layer > 0; --layer) {
+	for (size_t layer = this->network.size() - 1; layer > 0; --layer) {
 		// Previous activations: input image for first hidden layer
 		const Eigen::VectorXf &prev_activations = (layer == 0) ? this->input_activations : this->network[layer - 1].activations;
 

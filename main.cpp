@@ -2,15 +2,6 @@
 #include "mnist/include/mnist/mnist_reader.hpp"
 #include "mnist/include/mnist/mnist_utils.hpp"
 
-/*
-	struct MNIST_dataset {
-		OuterContainer<InnerContainer<PixelType>> training_images;
-		OuterContainer<InnerContainer<PixelType>> test_images;
-		OuterContainer<LabelType> training_labels;
-		OuterContainer<LabelType> test_labels;
-	};
-*/
-
 int main() {
 	auto dataset = mnist::read_dataset<std::vector, std::vector, float, uint8_t>("./mnist");
 	std::cout << "Data imported!\n";

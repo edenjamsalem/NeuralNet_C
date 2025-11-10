@@ -1,4 +1,4 @@
-NAME = NeuralNet_CPP
+NAME = NeuralNetMnist
 CC = g++
 FLAGS = -Wall -Werror -Wextra -std=c++17 \
 	-I./NeuralNetwork/include/Eigen \
@@ -6,10 +6,10 @@ FLAGS = -Wall -Werror -Wextra -std=c++17 \
 	-I./mnist/include
 
 # source files
-NNCDIR = ./NeuralNetwork/srcs
+NNDIR = ./NeuralNetwork/source
 SRCS = 	./main.cpp	\
-		$(NNCDIR)/utils.cpp	\
-		$(NNCDIR)/Network.cpp
+		$(NNDIR)/utils.cpp	\
+		$(NNDIR)/Network.cpp
 
 OBJDIR = ./build
 OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)

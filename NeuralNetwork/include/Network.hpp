@@ -31,8 +31,6 @@ struct LayerView {
 class NeuralNetwork {
 	private:
 		// Attributes
-		size_t num_layers;
-		std::vector<size_t> layer_sizes;
 		std::unique_ptr<float[]> buffer;
 		std::vector<LayerView> network;
 		Eigen::VectorXf input_activations;
