@@ -48,5 +48,5 @@ class NeuralNetwork {
 		NeuralNetwork(const std::vector<size_t> &layer_sizes);
 
 		// Methods
-		void SGD(std::vector<std::vector<float>> training_data, std::vector<uint8_t> training_labels);
+		void SGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels);
 };

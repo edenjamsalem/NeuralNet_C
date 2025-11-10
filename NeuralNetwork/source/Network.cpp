@@ -36,7 +36,7 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes)
 	: NeuralNetwork(static_cast<const std::vector<size_t>&>(layer_sizes)) 
 {}
 
-void NeuralNetwork::SGD(std::vector<std::vector<float>> trainingData, std::vector<uint8_t> trainingLabels) {
+void NeuralNetwork::SGD(std::vector<std::vector<float>> &trainingData, std::vector<uint8_t> &trainingLabels) {
 	// Used to track network's improvement across batches
 	size_t batchNumber = 0;
 	float currentBatchCost = 0.0f;
