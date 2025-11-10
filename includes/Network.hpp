@@ -39,7 +39,7 @@ class NeuralNetwork {
 
 		// Methods
 		void feedForward(const std::vector<float> &image);
-		void backProp();
+		void backProp(Eigen::VectorXf &expected_output);
 		void adjustNetwork(const size_t mini_batch_size);
 
 	public: 

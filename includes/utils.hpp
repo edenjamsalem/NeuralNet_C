@@ -4,5 +4,6 @@
 
 float gen_random_double();
 float sigmoid(float x);
+float sigmoidPrime(float a);
 float ReLU(float x);
 float calculateCost(const Eigen::VectorXf &output, const Eigen::VectorXf &expected_ouput);

@@ -43,7 +43,7 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 		currentBatchCost += calculateCost(this->network.back().activations, expected_output);
 
 		// backProp to calculate gradients for mini-batch
-		this->backProp();
+		this->backProp(expected_output);
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % mini_batch_size == 0)) {
@@ -54,7 +54,7 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 }
 
 void NeuralNetwork::feedForward(const std::vector<float> &image) {
-	this->input_activations = Eigen::VectorXf::Map(image.data(), image.size());
+	this->input_activations = Eigen::VectorXf(Eigen::Map<const Eigen::VectorXf>(image.data(), image.size()));
 	Eigen::VectorXf activations = this->input_activations;
     
 	for (auto &layer : this->network) {
@@ -64,25 +64,43 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
     }
 }
 
-void NeuralNetwork::backProp() {
-	for (size_t layer = this->layer_sizes.back(); layer > 0; --layer) { 
-		
+void NeuralNetwork::backProp(Eigen::VectorXf &expected_output) {
+	size_t layer = this->num_layers - 1;
+
+	// calculate delta (how much each output node contributed to final cost)
+    Eigen::VectorXf delta = (this->network[layer].activations - expected_output).cwiseProduct(this->network[layer].activations.unaryExpr(&sigmoidPrime));
+
+    // Accumulate gradient for output layer
+    this->network[layer].dW += delta * this->network[layer - 1].activations.transpose();
+    this->network[layer].db += delta;
+
+	while (layer > 0) {
+		--layer;
+		// δᶩ = (Wᵗ δˡ⁺¹) ⊙ σ'(aᶩ)
+		Eigen::VectorXf sp = this->network[layer].activations.unaryExpr(&sigmoidPrime);
+		delta = (this->network[layer + 1].weights.transpose() * delta).cwiseProduct(sp);
+
+		// Previous activations: input image for first hidden layer
+		const Eigen::VectorXf &prev_activations = (layer == 0) ? this->input_activations : this->network[layer - 1].activations;
+
+		// Accumulate gradients
+		this->network[layer].dW += delta * prev_activations.transpose();
+		this->network[layer].db += delta;
 	}
 }
 
 void NeuralNetwork::adjustNetwork(const size_t mini_batch_size) {
-// η => learning rate (how large a step we take along our gradient)
-	// const float η = 0.1f;
+	// η => learning rate (how large a step we take along our gradient)
+	const float η = 0.1f;
+	(void)η;
+
 	for (auto &layer : this->network) {
-     // average gradients for minibatch 
-	 layer.dW /= mini_batch_size; 
-	 layer.db /= mini_batch_size; 
-	 
-	 // apply changes to weights and biases 
-	 // ... 
-	 
-	 // reset dW and db for next batch 
-	 layer.dW.setZero(); 
-	 layer.db.setZero();
+		// apply changes to weights and biases 
+		layer.weights -= η * (layer.dW / mini_batch_size);
+		layer.biases -= η * (layer.db / mini_batch_size);
+		
+		// reset dW and db for next batch 
+		layer.dW.setZero();
+		layer.db.setZero();
     }
 }
