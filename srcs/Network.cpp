@@ -29,9 +29,9 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) :
 
 void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<float, std::__1::allocator<float>>, uint8_t> dataset) {
 	Eigen::VectorXf expected_output(this->layer_sizes.back());
+	size_t batchNumber = 1;
 	float currentBatchCost = 0.0f; // only used to track improvements in network's accuracy 
-	(void)currentBatchCost;
-	const size_t mini_batch_size = 64;
+	const size_t miniBatchSize = 16;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < dataset.training_images.size(); ++i) {
@@ -46,9 +46,11 @@ void NeuralNetwork::SGD(mnist::MNIST_dataset<std::__1::vector, std::__1::vector<
 		this->backProp(expected_output);
 
 		// adjust parameters after each mini-batch
-		if ((i > 1 && i % mini_batch_size == 0)) {
-			this->adjustNetwork(mini_batch_size);
+		if ((i > 1 && i % miniBatchSize == 0)) {
+			this->adjustNetwork(miniBatchSize);
+			std::cout << "Mini-batch " << batchNumber << " cost: " << currentBatchCost / miniBatchSize << "\n";
 			currentBatchCost = 0;
+			batchNumber++;
 		}
 	}
 }
