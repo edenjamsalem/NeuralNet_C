@@ -45,15 +45,15 @@ void NeuralNetwork::SGD(std::vector<std::vector<float>> trainingData, std::vecto
 	for (size_t i = 0; i < trainingData.size(); ++i) {
 		this->feedForward(trainingData[i]);
 
-		// vectorize exepected output && calculate cost 
+		// vectorize exepected output 
 		this->expectedOutput.setZero();
 		this->expectedOutput[trainingLabels[i]] = 1.0f;
-		currentBatchCost += calculateCost(this->network.back().activations, this->expectedOutput);
 
+		currentBatchCost += calculateCost(this->network.back().activations, this->expectedOutput);
 		this->backProp();
 
 		// adjust parameters after each mini-batch
-		if ((i > 1 && i % this->miniBatchSize == 0) || i == trainingData.size()) {
+		if ((i > 1 && i % this->miniBatchSize == 0) || i == trainingData.size() - 1) {
 			std::cout << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
 			this->adjustNetwork();
 			currentBatchCost = 0;
@@ -62,6 +62,7 @@ void NeuralNetwork::SGD(std::vector<std::vector<float>> trainingData, std::vecto
 }
 
 void NeuralNetwork::feedForward(const std::vector<float> &image) {
+	// copy inputs so original image is not overwritten
 	this->inputActivations = Eigen::VectorXf(Eigen::Map<const Eigen::VectorXf>(image.data(), image.size()));
 	Eigen::VectorXf &activations = this->inputActivations;
     
