@@ -56,8 +56,8 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
 	Eigen::VectorXf activations = Eigen::VectorXf::Map(image.data(), image.size());
 
     for (auto &layer : this->network) {
-        Eigen::VectorXf z = (layer.weights * activations) + layer.biases;
-        layer.activations = z.unaryExpr(&sigmoid);
+        layer.activations = (layer.weights * activations) + layer.biases;
+        layer.activations = layer.activations.unaryExpr(&sigmoid);
         activations = layer.activations;
     }
 }
