@@ -69,7 +69,7 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
 void NeuralNetwork::backProp(Eigen::VectorXf &expected_output) {
 	size_t layer = this->num_layers - 1;
 
-	// calculate delta (how much each output node contributed to final cost)
+	// calculate output delta (how much each node contributed to final cost)
     Eigen::VectorXf delta = (this->network[layer].activations - expected_output).cwiseProduct(this->network[layer].activations.unaryExpr(&sigmoidPrime));
 
     // Accumulate gradient for output layer
@@ -94,7 +94,6 @@ void NeuralNetwork::backProp(Eigen::VectorXf &expected_output) {
 void NeuralNetwork::adjustNetwork(const size_t mini_batch_size) {
 	// η => learning rate (how large a step we take along our gradient)
 	const float η = 0.1f;
-	(void)η;
 
 	for (auto &layer : this->network) {
 		// apply changes to weights and biases 
