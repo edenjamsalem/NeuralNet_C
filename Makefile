@@ -1,17 +1,22 @@
 NAME = NeuralNet_CPP
 CC = g++
-FLAGS = -Wall -Werror -Wextra -std=c++17 -I./includes/Eigen
+FLAGS = -Wall -Werror -Wextra -std=c++17 \
+	-I./NeuralNetwork/include/Eigen \
+	-I./NeuralNetwork/include \
+	-I./mnist/include
 
-SRCDIR = ./srcs
-SRCS = 	$(SRCDIR)/main.cpp	\
-		$(SRCDIR)/utils.cpp	\
-		$(SRCDIR)/Network.cpp
+# source files
+NNCDIR = ./NeuralNetwork/srcs
+SRCS = 	./main.cpp	\
+		$(NNCDIR)/utils.cpp	\
+		$(NNCDIR)/Network.cpp
 
 OBJDIR = ./build
-OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)
 
 # compile step
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -c $< -o $@
 
 # link step

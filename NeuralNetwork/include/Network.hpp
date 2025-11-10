@@ -1,7 +1,7 @@
 #pragma once
-#include "mnist/include/mnist/mnist_reader.hpp"
 #include "utils.hpp"
 #include "Eigen/Dense"
+#include <iostream>
 
 struct LayerView {
 	// view memory used for network

@@ -1,4 +1,6 @@
-#include "../includes/header.hpp"
+#include "NeuralNetwork/include/Network.hpp"
+#include "mnist/include/mnist/mnist_reader.hpp"
+#include "mnist/include/mnist/mnist_utils.hpp"
 
 /*
 	struct MNIST_dataset {
@@ -10,7 +12,7 @@
 */
 
 int main() {
-	auto dataset = mnist::read_dataset<std::vector, std::vector, float, uint8_t>("./includes/mnist");
+	auto dataset = mnist::read_dataset<std::vector, std::vector, float, uint8_t>("./mnist");
 	std::cout << "Data imported!\n";
 	
 	// grayscale 0.0-255.0 --> 0.0-1.0

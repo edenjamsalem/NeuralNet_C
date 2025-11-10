@@ -1,4 +1,4 @@
-#include "../includes/header.hpp"
+#include "../include/Network.hpp"
 
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layer_sizes) : 
 	num_layers(layer_sizes.size() - 1),
