@@ -1,4 +1,4 @@
-NAME = NeuralNetMnist
+NAME = NN_Mnist
 CC = g++
 FLAGS = -Wall -Werror -Wextra -std=c++17 \
 	-I./NeuralNetwork/include/Eigen \

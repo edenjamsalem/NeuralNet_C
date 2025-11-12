@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
 	// Create network
 	std::cout << "Creating Neural Network!\n";
 	NeuralNetwork network({dataset.test_images[0].size(), 128, 64, 10}); // assumes inputs size is the same for all images
-	const std::string filename("neuralNetwork.bin");
+	const std::string filename("NN.bin");
 
 	if (argc < 2) {
 		// Train model using Mini-batch Stochastic Gradient Descent algorithm
