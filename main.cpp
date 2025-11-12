@@ -10,13 +10,12 @@ int main() {
 	mnist::normalize_dataset(dataset);
 	
 	// Create network
-	size_t input_size = dataset.test_images[0].size(); // assumes inputs size is the same for all images
-	NeuralNetwork network({input_size, 128, 64, 10});
-	std::cout << "Network created!\n";
+	std::cout << "Creating Neural Network!\n";
+	NeuralNetwork network({dataset.test_images[0].size(), 128, 64, 10}); // assumes inputs size is the same for all images
 
 	// Apply Mini-batch Stochastic Gradient Descent algorithm to training data
 	std::cout << "Training model...\n";
-	network.SGD(dataset.training_images, dataset.training_labels);
+	network.trainModelSGD(dataset.training_images, dataset.training_labels);
 	std::cout << "Finished training set of " << dataset.training_images.size() << " images!\n";
 
 	// Run model with test data to find rate of successful predictions

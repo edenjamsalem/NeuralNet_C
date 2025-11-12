@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "Eigen/Dense"
 #include <iostream>
+#include <fstream>
 
 struct LayerView {
 	// view memory used for network
@@ -35,6 +36,7 @@ struct LayerView {
 class NeuralNetwork {
 	private:
 		// Attributes
+		size_t buffer_size = 0;
 		std::unique_ptr<float[]> buffer;
 		std::vector<LayerView> network;
 		Eigen::VectorXf inputActivations;
@@ -56,6 +58,8 @@ class NeuralNetwork {
 		NeuralNetwork(const std::vector<size_t> &layer_sizes);
 
 		// Methods
-		void SGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels);
+		void trainModelSGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels);
 		float test(std::vector<std::vector<float>> &test_data, std::vector<uint8_t> &test_labels);
+		void saveModel(const std::string &filename);
+		void loadModel(const std::string &filename);
 };

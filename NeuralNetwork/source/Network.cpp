@@ -1,5 +1,7 @@
 #include "../include/Network.hpp"
 
+/* --- Constructors --- */
+
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) : 
 	inputActivations(layout.front()),
 	expectedOutput(layout.back()),
@@ -12,14 +14,13 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) :
 
 	// allocate network buffer
 	network.reserve(layout.size() - 1);
-	size_t total_size = 0;
 
 	for (size_t layer = 0; layer < layout.size() - 1; ++layer) {
 		size_t rows = layout[layer + 1];
 		size_t cols = layout[layer];
-		total_size += (2 * rows * cols) + (4 * rows);
+		buffer_size += (2 * rows * cols) + (4 * rows);
 	}
-	buffer = std::make_unique<float[]>(total_size);
+	buffer = std::make_unique<float[]>(buffer_size);
 
 	// assign map views of each layer
 	float *start = this->buffer.get();
@@ -36,7 +37,10 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes)
 	: NeuralNetwork(static_cast<const std::vector<size_t>&>(layer_sizes)) 
 {}
 
-void NeuralNetwork::SGD(std::vector<std::vector<float>> &trainingData, std::vector<uint8_t> &trainingLabels) {
+/* --- Public Methods --- */
+
+// Uses mini-batch 'Stochastic Gradient Descent' to train model on the training_data
+void NeuralNetwork::trainModelSGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels) {
 	// Used to track network's improvement across batches
 	size_t progressBar = 1;
 	size_t progressBarMax = 40;
@@ -44,24 +48,24 @@ void NeuralNetwork::SGD(std::vector<std::vector<float>> &trainingData, std::vect
 	// float currentBatchCost = 0.0f;
 
 	// train network on each image in the dataset
-	for (size_t i = 0; i < trainingData.size(); ++i) {
-		this->_feedForward(trainingData[i]);
+	for (size_t i = 0; i < training_data.size(); ++i) {
+		this->_feedForward(training_data[i]);
 
 		// vectorize exepected output 
 		this->expectedOutput.setZero();
-		this->expectedOutput[trainingLabels[i]] = 1.0f;
+		this->expectedOutput[training_labels[i]] = 1.0f;
 
 		// currentBatchCost += calculateCost(this->network.back().activations, this->expectedOutput);
 		this->_backProp();
 
 		// adjust parameters after each mini-batch
-		if ((i > 1 && i % this->miniBatchSize == 0) || i == trainingData.size() - 1) {
+		if ((i > 1 && i % this->miniBatchSize == 0) || i == training_data.size() - 1) {
 			// std::cout << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
 			// currentBatchCost = 0;
 			this->_adjustNetwork();
 
 			// update progress bar
-			if (i >= (progressBar * trainingData.size() / progressBarMax)) {
+			if (i >= (progressBar * training_data.size() / progressBarMax)) {
 				std::cout << "|";
 				std::cout.flush();
 				progressBar++;
@@ -70,6 +74,45 @@ void NeuralNetwork::SGD(std::vector<std::vector<float>> &trainingData, std::vect
 	}
 	std::cout << std::endl;
 }
+
+float NeuralNetwork::test(std::vector<std::vector<float>> &test_data, std::vector<uint8_t> &test_labels) {
+	size_t successCount = 0;
+	Eigen::Index prediction;
+
+	for (size_t i = 0; i < test_data.size(); i++) {
+		// feed each image into the network
+		this->_feedForward(test_data[i]);
+
+		// compare predicted output to expected value
+		this->network.back().activations.maxCoeff(&prediction);
+		successCount += (static_cast<uint8_t>(prediction) == test_labels[i]);
+
+		// std::cout << "Prediction: " << prediction << "\n";
+		// std::cout << "Expected: " << static_cast<int>(test_labels[i]) << "\n";
+	}
+	return (static_cast<float>(successCount) / test_data.size());
+}
+
+// Save NeuralNetwork to binary file
+void NeuralNetwork::saveModel(const std::string &filename) {
+	std::ofstream out(filename, std::ios::binary);
+	if (!out) throw std::runtime_error("Cannot open file for saving model");
+
+	out.write(reinterpret_cast<char*>(this->buffer.get()), buffer_size * sizeof(float));
+	out.close();
+}
+
+// Load binary file into NeuralNetwork object
+void NeuralNetwork::loadModel(const std::string &filename) {
+	std::ifstream in(filename, std::ios::binary);
+	if (!in) throw std::runtime_error("Cannot open file for loading model");
+
+	in.read(reinterpret_cast<char*>(this->buffer.get()), this->buffer_size * sizeof(float));
+	if (!in) throw std::runtime_error("Error reading model from file");
+	in.close();
+}
+
+/* --- Private Methods --- */
 
 void NeuralNetwork::_feedForward(const std::vector<float> &image) {
 	// copy inputs so original image is not overwritten
@@ -114,22 +157,4 @@ void NeuralNetwork::_adjustNetwork() {
 		layer.db.setZero();
 		layer.delta.setZero();
     }
-}
-
-float NeuralNetwork::test(std::vector<std::vector<float>> &test_data, std::vector<uint8_t> &test_labels) {
-	size_t successCount = 0;
-	Eigen::Index prediction;
-
-	for (size_t i = 0; i < test_data.size(); i++) {
-		// feed each image into the network
-		this->_feedForward(test_data[i]);
-
-		// compare predicted output to expected value
-		this->network.back().activations.maxCoeff(&prediction);
-		successCount += (static_cast<uint8_t>(prediction) == test_labels[i]);
-
-		// std::cout << "Prediction: " << prediction << "\n";
-		// std::cout << "Expected: " << static_cast<int>(test_labels[i]) << "\n";
-	}
-	return (static_cast<float>(successCount) / test_data.size());
 }
