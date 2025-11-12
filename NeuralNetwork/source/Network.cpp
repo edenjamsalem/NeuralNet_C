@@ -1,6 +1,8 @@
 #include "../include/Network.hpp"
 
-/* --- Constructors --- */
+/* 
+	--- Constructors --- 
+*/
 
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) : 
 	inputActivations(layout.front()),
@@ -18,9 +20,9 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) :
 	for (size_t layer = 0; layer < layout.size() - 1; ++layer) {
 		size_t rows = layout[layer + 1];
 		size_t cols = layout[layer];
-		buffer_size += (2 * rows * cols) + (4 * rows);
+		this->buffer_size += (2 * rows * cols) + (4 * rows);
 	}
-	buffer = std::make_unique<float[]>(buffer_size);
+	buffer = std::make_unique<float[]>(this->buffer_size);
 
 	// assign map views of each layer
 	float *start = this->buffer.get();
@@ -37,7 +39,9 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes)
 	: NeuralNetwork(static_cast<const std::vector<size_t>&>(layer_sizes)) 
 {}
 
-/* --- Public Methods --- */
+/* 
+	--- Public Methods --- 
+*/
 
 // Uses mini-batch 'Stochastic Gradient Descent' to train model on the training_data
 void NeuralNetwork::trainModelSGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels) {
@@ -112,7 +116,9 @@ void NeuralNetwork::loadModel(const std::string &filename) {
 	in.close();
 }
 
-/* --- Private Methods --- */
+/* 
+	--- Private Methods --- 
+*/
 
 void NeuralNetwork::_feedForward(const std::vector<float> &image) {
 	// copy inputs so original image is not overwritten
