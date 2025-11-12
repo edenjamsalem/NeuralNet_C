@@ -97,23 +97,27 @@ float NeuralNetwork::test(std::vector<std::vector<float>> &test_data, std::vecto
 	return (static_cast<float>(successCount) / test_data.size());
 }
 
-// Save NeuralNetwork to binary file
+// Save weights and biases to binary file
 void NeuralNetwork::saveModel(const std::string &filename) {
-	std::ofstream out(filename, std::ios::binary);
-	if (!out) throw std::runtime_error("Cannot open file for saving model");
+    std::ofstream out(filename, std::ios::binary);
+    if (!out) throw std::runtime_error("Cannot open file for saving model");
 
-	out.write(reinterpret_cast<char*>(this->buffer.get()), buffer_size * sizeof(float));
-	out.close();
+    for (auto &layer : network) {
+        out.write(reinterpret_cast<char*>(layer.weights.data()), layer.weights.size() * sizeof(float));
+        out.write(reinterpret_cast<char*>(layer.biases.data()), layer.biases.size() * sizeof(float));
+    }
 }
 
-// Load binary file into NeuralNetwork object
+// Load weights and biases from binary file
 void NeuralNetwork::loadModel(const std::string &filename) {
-	std::ifstream in(filename, std::ios::binary);
-	if (!in) throw std::runtime_error("Cannot open file for loading model");
+    std::ifstream in(filename, std::ios::binary);
+    if (!in) throw std::runtime_error("Cannot open file for loading model");
 
-	in.read(reinterpret_cast<char*>(this->buffer.get()), this->buffer_size * sizeof(float));
-	if (!in) throw std::runtime_error("Error reading model from file");
-	in.close();
+    for (auto &layer : network) {
+        in.read(reinterpret_cast<char*>(layer.weights.data()), layer.weights.size() * sizeof(float));
+        in.read(reinterpret_cast<char*>(layer.biases.data()), layer.biases.size() * sizeof(float));
+        if (!in) throw std::runtime_error("Error reading model from file");
+    }
 }
 
 /* 
