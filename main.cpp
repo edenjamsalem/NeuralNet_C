@@ -11,7 +11,7 @@ int main() {
 	
 	// Create network
 	size_t input_size = dataset.test_images[0].size(); // assumes inputs size is the same for all images
-	NeuralNetwork network({input_size, 16, 16, 10});
+	NeuralNetwork network({input_size, 128, 64, 10});
 	std::cout << "Network created!\n";
 
 	// Apply Mini-batch Stochastic Gradient Descent algorithm to training data

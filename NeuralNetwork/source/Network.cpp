@@ -127,6 +127,9 @@ float NeuralNetwork::test(std::vector<std::vector<float>> &test_data, std::vecto
 		// compare predicted output to expected value
 		this->network.back().activations.maxCoeff(&prediction);
 		successCount += (static_cast<uint8_t>(prediction) == test_labels[i]);
+
+		// std::cout << "Prediction: " << prediction << "\n";
+		// std::cout << "Expected: " << static_cast<int>(test_labels[i]) << "\n";
 	}
 	return (static_cast<float>(successCount) / test_data.size());
 }

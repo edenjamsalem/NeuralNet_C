@@ -23,8 +23,8 @@ struct LayerView {
 		delta(start + (2 * r * c) + (3 * r), r)
 		{
 			weights.setRandom();
-			weights *= std::sqrt(2.0f / c);
-			biases.setRandom();
+			weights *= std::sqrt(6.0f / (r + c));
+			biases.setZero();
 			activations.setZero();
 			dW.setZero();
 			db.setZero();
@@ -42,7 +42,7 @@ class NeuralNetwork {
 		
 		// Constants
 		const size_t miniBatchSize = 32; 
-		const float η = 0.01f; // η => learning rate (how large a step we take along our gradient)
+		const float η = 1.0f; // η => learning rate (how large a step we take along our gradient)
 		const float scale;
 
 		// Methods
