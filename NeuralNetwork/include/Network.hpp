@@ -12,19 +12,23 @@ struct LayerView {
 	// view of memory used for backProp gradients 
 	Eigen::Map<Eigen::MatrixXf> dW;
     Eigen::Map<Eigen::VectorXf> db;
+    Eigen::Map<Eigen::VectorXf> delta;
 
 	LayerView(float *start, size_t r, size_t c) :
 		weights(start, r, c),
 		biases(start + (r * c), r),
 		activations(start + (r * c) + r, r) ,
 		dW(start + (r * c) + (2 * r), r, c),
-		db(start + (2 * r * c) + (2 * r), r)
+		db(start + (2 * r * c) + (2 * r), r),
+		delta(start + (2 * r * c) + (3 * r), r)
 		{
 			weights.setRandom();
+			weights *= std::sqrt(2.0f / c);
 			biases.setRandom();
 			activations.setZero();
 			dW.setZero();
 			db.setZero();
+			delta.setZero();
 		}
 };
 

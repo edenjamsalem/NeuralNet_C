@@ -15,7 +15,11 @@ float sigmoidPrime(float a) {
 }
 
 float ReLU(float x) {
-    return (x < 0.0 ? 0.0 : x);
+    return (x > 0.0f ? x : 0.0f);
+}
+
+float ReLUPrime(float x) {
+    return (x > 0.0f);
 }
 
 float calculateCost(const Eigen::VectorXf &output, const Eigen::VectorXf &expected_ouput) {

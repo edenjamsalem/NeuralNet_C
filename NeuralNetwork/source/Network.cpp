@@ -17,7 +17,7 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) :
 	for (size_t layer = 0; layer < layout.size() - 1; ++layer) {
 		size_t rows = layout[layer + 1];
 		size_t cols = layout[layer];
-		total_size += (2 * rows * cols) + (3 * rows);
+		total_size += (2 * rows * cols) + (4 * rows);
 	}
 	buffer = std::make_unique<float[]>(total_size);
 
@@ -28,7 +28,7 @@ NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) :
 		size_t cols = layout[layer];
 
 		network.emplace_back(LayerView(start, rows, cols));
-		start += (2 * rows * cols) + (3 * rows);
+		start += (2 * rows * cols) + (4 * rows);
 	}
 }
 
@@ -64,7 +64,7 @@ void NeuralNetwork::SGD(std::vector<std::vector<float>> &trainingData, std::vect
 void NeuralNetwork::feedForward(const std::vector<float> &image) {
 	// copy inputs so original image is not overwritten
 	this->inputActivations = Eigen::VectorXf(Eigen::Map<const Eigen::VectorXf>(image.data(), image.size()));
-	Eigen::VectorXf &activations = this->inputActivations;
+	Eigen::VectorXf activations = this->inputActivations;
     
 	for (auto &layer : this->network) {
         layer.activations.noalias() = (layer.weights * activations) + layer.biases;
@@ -74,34 +74,38 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
 }
 
 void NeuralNetwork::backProp() {
-	// calculate output delta (how much each node contributed to final cost)
-    Eigen::VectorXf delta = (this->network.back().activations - this->expectedOutput).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
+	// Calculate output delta (how much each node contributed to final cost)
+    this->network.back().delta = (this->network.back().activations - this->expectedOutput).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
 
-	for (size_t layer = this->network.size() - 1; layer > 0; --layer) {
-		// Previous activations: input image for first hidden layer
-		const Eigen::VectorXf &prev_activations = (layer == 0) ? this->inputActivations : this->network[layer - 1].activations;
+	// Backpropagate delta
+	for (int layer = static_cast<int>(this->network.size()) - 2; layer >= 0; --layer) {
+		LayerView &current = this->network[layer];
+		LayerView &next = this->network[layer + 1];
+		current.delta = (next.weights.transpose() * next.delta).cwiseProduct(current.activations.unaryExpr(&sigmoidPrime));
+	}
 
-		// Accumulate gradients
-		this->network[layer].dW += delta * prev_activations.transpose();
-		this->network[layer].db += delta;
+	// Compute Gradients
+	Eigen::VectorXf prevActivations = this->inputActivations;
+	for (auto &layer : this->network) {
+		layer.dW += layer.delta * prevActivations.transpose();
+		layer.db += layer.delta;
 
-		// δᶩ = (Wᵗ δˡ⁺¹) ⊙ σ'(aᶩ)
-		Eigen::VectorXf sp = prev_activations.unaryExpr(&sigmoidPrime);
-		delta = (this->network[layer].weights.transpose() * delta).cwiseProduct(sp);
+		prevActivations = layer.activations;
 	}
 }
 
 void NeuralNetwork::adjustNetwork() {
 	// η => learning rate (how large a step we take along our gradient)
-	const float η = 0.1f;
+	const float η = 0.01f;
 
 	for (auto &layer : this->network) {
 		// apply changes to weights and biases 
 		layer.weights -= η * (layer.dW / this->miniBatchSize);
 		layer.biases -= η * (layer.db / this->miniBatchSize);
 		
-		// reset dW and db for next batch 
+		// reset for next batch 
 		layer.dW.setZero();
 		layer.db.setZero();
+		layer.delta.setZero();
     }
 }
