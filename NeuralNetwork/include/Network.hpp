@@ -39,7 +39,11 @@ class NeuralNetwork {
 		std::vector<LayerView> network;
 		Eigen::VectorXf inputActivations;
 		Eigen::VectorXf expectedOutput;
-		const size_t miniBatchSize;
+		
+		// Constants
+		const size_t miniBatchSize = 32; 
+		const float η = 0.01f; // η => learning rate (how large a step we take along our gradient)
+		const float scale;
 
 		// Methods
 		void feedForward(const std::vector<float> &image);

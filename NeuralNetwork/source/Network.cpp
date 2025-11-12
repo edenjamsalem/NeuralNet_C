@@ -3,7 +3,7 @@
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) : 
 	inputActivations(layout.front()),
 	expectedOutput(layout.back()),
-	miniBatchSize(32)
+	scale(η / miniBatchSize)
 {
 	// validate network size
 	if (layout.size() < 3) {
@@ -89,19 +89,15 @@ void NeuralNetwork::backProp() {
 	for (auto &layer : this->network) {
 		layer.dW += layer.delta * prevActivations.transpose();
 		layer.db += layer.delta;
-
 		prevActivations = layer.activations;
 	}
 }
 
 void NeuralNetwork::adjustNetwork() {
-	// η => learning rate (how large a step we take along our gradient)
-	const float η = 0.01f;
-
 	for (auto &layer : this->network) {
 		// apply changes to weights and biases 
-		layer.weights -= η * (layer.dW / this->miniBatchSize);
-		layer.biases -= η * (layer.db / this->miniBatchSize);
+		layer.weights.noalias() -= this->scale * layer.dW;
+		layer.biases.noalias() -= this->scale * layer.db;
 		
 		// reset for next batch 
 		layer.dW.setZero();
