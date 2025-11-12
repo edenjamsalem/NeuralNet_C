@@ -159,8 +159,8 @@ void NeuralNetwork::_backProp() {
 void NeuralNetwork::_adjustNetwork() {
 	for (auto &layer : this->network) {
 		// apply changes to weights and biases 
-		layer.weights.noalias() -= this->scale * layer.dW;
-		layer.biases.noalias() -= this->scale * layer.db;
+		layer.weights -= this->scale * layer.dW;
+		layer.biases -= this->scale * layer.db;
 		
 		// reset for next batch 
 		layer.dW.setZero();
