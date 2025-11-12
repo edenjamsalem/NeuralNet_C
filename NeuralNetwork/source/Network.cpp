@@ -38,30 +38,40 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes)
 
 void NeuralNetwork::SGD(std::vector<std::vector<float>> &trainingData, std::vector<uint8_t> &trainingLabels) {
 	// Used to track network's improvement across batches
-	size_t batchNumber = 0;
-	float currentBatchCost = 0.0f;
+	size_t progressBar = 1;
+	size_t progressBarMax = 40;
+	// size_t batchNumber = 0;
+	// float currentBatchCost = 0.0f;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < trainingData.size(); ++i) {
-		this->feedForward(trainingData[i]);
+		this->_feedForward(trainingData[i]);
 
 		// vectorize exepected output 
 		this->expectedOutput.setZero();
 		this->expectedOutput[trainingLabels[i]] = 1.0f;
 
-		currentBatchCost += calculateCost(this->network.back().activations, this->expectedOutput);
-		this->backProp();
+		// currentBatchCost += calculateCost(this->network.back().activations, this->expectedOutput);
+		this->_backProp();
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % this->miniBatchSize == 0) || i == trainingData.size() - 1) {
-			std::cout << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
-			this->adjustNetwork();
-			currentBatchCost = 0;
+			// std::cout << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
+			// currentBatchCost = 0;
+			this->_adjustNetwork();
+
+			// update progress bar
+			if (i >= (progressBar * trainingData.size() / progressBarMax)) {
+				std::cout << "|";
+				std::cout.flush();
+				progressBar++;
+			}
 		}
 	}
+	std::cout << std::endl;
 }
 
-void NeuralNetwork::feedForward(const std::vector<float> &image) {
+void NeuralNetwork::_feedForward(const std::vector<float> &image) {
 	// copy inputs so original image is not overwritten
 	this->inputActivations = Eigen::VectorXf(Eigen::Map<const Eigen::VectorXf>(image.data(), image.size()));
 	Eigen::VectorXf activations = this->inputActivations;
@@ -73,7 +83,7 @@ void NeuralNetwork::feedForward(const std::vector<float> &image) {
     }
 }
 
-void NeuralNetwork::backProp() {
+void NeuralNetwork::_backProp() {
 	// Calculate output delta (how much each node contributed to final cost)
     this->network.back().delta = (this->network.back().activations - this->expectedOutput).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
 
@@ -93,7 +103,7 @@ void NeuralNetwork::backProp() {
 	}
 }
 
-void NeuralNetwork::adjustNetwork() {
+void NeuralNetwork::_adjustNetwork() {
 	for (auto &layer : this->network) {
 		// apply changes to weights and biases 
 		layer.weights.noalias() -= this->scale * layer.dW;
@@ -104,4 +114,19 @@ void NeuralNetwork::adjustNetwork() {
 		layer.db.setZero();
 		layer.delta.setZero();
     }
+}
+
+float NeuralNetwork::test(std::vector<std::vector<float>> &test_data, std::vector<uint8_t> &test_labels) {
+	size_t successCount = 0;
+	Eigen::Index prediction;
+
+	for (size_t i = 0; i < test_data.size(); i++) {
+		// feed each image into the network
+		this->_feedForward(test_data[i]);
+
+		// compare predicted output to expected value
+		this->network.back().activations.maxCoeff(&prediction);
+		successCount += (static_cast<uint8_t>(prediction) == test_labels[i]);
+	}
+	return (static_cast<float>(successCount) / test_data.size());
 }

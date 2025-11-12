@@ -15,6 +15,12 @@ int main() {
 	std::cout << "Network created!\n";
 
 	// Apply Mini-batch Stochastic Gradient Descent algorithm to training data
+	std::cout << "Training model...\n";
 	network.SGD(dataset.training_images, dataset.training_labels);
 	std::cout << "Finished training set of " << dataset.training_images.size() << " images!\n";
+
+	// Run model with test data to find rate of successful predictions
+	std::cout << "Running test data!\n";
+	float successRate = network.test(dataset.test_images, dataset.test_labels);
+	std::cout << "Model predicted test data with " << (successRate * 100) << "% accuracy!\n";
 }

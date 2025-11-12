@@ -46,9 +46,9 @@ class NeuralNetwork {
 		const float scale;
 
 		// Methods
-		void feedForward(const std::vector<float> &image);
-		void backProp();
-		void adjustNetwork();
+		void _feedForward(const std::vector<float> &image);
+		void _backProp();
+		void _adjustNetwork();
 
 	public: 
 		// Constructors
@@ -57,4 +57,5 @@ class NeuralNetwork {
 
 		// Methods
 		void SGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels);
+		float test(std::vector<std::vector<float>> &test_data, std::vector<uint8_t> &test_labels);
 };
