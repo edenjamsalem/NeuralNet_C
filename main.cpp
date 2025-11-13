@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 	
 	// Create network
 	std::cout << "Creating Neural Network!\n";
-	NeuralNetwork network({dataset.test_images[0].size(), 128, 64, 10});
+	NeuralNetwork network({dataset.test_images[0].size(), 128, 32, 10});
 	const std::string filename("NN.bin");
 
 	if (argc < 2) {

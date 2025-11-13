@@ -7,7 +7,7 @@
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) : 
 	inputActivations(layout.front()),
 	expectedOutput(layout.back()),
-	scale(η / miniBatchSize)
+	batchScale(η / miniBatchSize)
 {
 	// validate network size
 	if (layout.size() < 3) {
@@ -137,13 +137,19 @@ void NeuralNetwork::_feedForward(const std::vector<float> &image) {
 }
 
 void NeuralNetwork::_backProp() {
-	// Calculate output delta (how much each node contributed to final cost)
-    this->network.back().delta = (this->network.back().activations - this->expectedOutput).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
+	// Derivation of δL 		: how much each output node contributed to the final cost
+	// C = 1/2∑j(yj−aLj) 		: cost function
+	// ∇aC = ∂C/∂aL = aL−y  	: rate of change of cost with respect to output activations aL
+    // δL = (aL−y) ⊙ σ′(zL) 	: aL replaces zL here to minimise memory use, sigmoidPrime is updated accordingly
+	
+	this->network.back().delta = (this->network.back().activations - this->expectedOutput).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
 
 	// Backpropagate delta
 	for (int layer = static_cast<int>(this->network.size()) - 2; layer >= 0; --layer) {
 		LayerView &current = this->network[layer];
 		LayerView &next = this->network[layer + 1];
+
+		//δl = ((wl+1)Tδl+1) ⊙ σ′(zl),
 		current.delta = (next.weights.transpose() * next.delta).cwiseProduct(current.activations.unaryExpr(&sigmoidPrime));
 	}
 
@@ -159,8 +165,8 @@ void NeuralNetwork::_backProp() {
 void NeuralNetwork::_adjustNetwork() {
 	for (auto &layer : this->network) {
 		// apply changes to weights and biases 
-		layer.weights -= this->scale * layer.dW;
-		layer.biases -= this->scale * layer.db;
+		layer.weights -= this->batchScale * layer.dW;
+		layer.biases -= this->batchScale * layer.db;
 		
 		// reset for next batch 
 		layer.dW.setZero();

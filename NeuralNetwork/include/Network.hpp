@@ -4,13 +4,14 @@
 #include <iostream>
 #include <fstream>
 
+// Layered view of the network's contiguous float[] buffer
 struct LayerView {
 	// view memory used for network
 	Eigen::Map<Eigen::MatrixXf> weights;
 	Eigen::Map<Eigen::VectorXf> biases;
     Eigen::Map<Eigen::VectorXf> activations;
 
-	// view of memory used for backProp gradients 
+	// view of memory used for backProp() 
 	Eigen::Map<Eigen::MatrixXf> dW;
     Eigen::Map<Eigen::VectorXf> db;
     Eigen::Map<Eigen::VectorXf> delta;
@@ -44,8 +45,8 @@ class NeuralNetwork {
 		
 		// Constants
 		const size_t miniBatchSize = 32; 
-		const float η = 3.0f; // η => learning rate (how large a step we take along our gradient)
-		const float scale;
+		const float η = 3.0f;	// learning rate (how large a step we take along our gradient)
+		const float batchScale;
 
 		// Methods
 		void _feedForward(const std::vector<float> &image);
