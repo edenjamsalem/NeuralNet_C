@@ -45,7 +45,7 @@ class NeuralNetwork {
 		
 		// Constants
 		const size_t miniBatchSize = 32; 
-		const float η = 0.1f;	// learning rate (how large a step we take along our gradient)
+		const float η = 0.3f;	// learning rate (how large a step we take along our gradient)
 		const float batchScale;
 
 		// Methods
@@ -62,7 +62,7 @@ class NeuralNetwork {
 		void trainModelSGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels);
 		float test(std::vector<std::vector<float>> &test_data, std::vector<uint8_t> &test_labels);
 		void loadModel(std::istream &in);
+		void loadModel(const std::string &filename);
 		void saveModel(std::ostream &out);
 		void saveModel(const std::string &filename);
-		void loadModel(const std::string &filename);
 };
