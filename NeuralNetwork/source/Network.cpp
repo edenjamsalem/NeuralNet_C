@@ -152,7 +152,7 @@ void NeuralNetwork::_feedForward(const std::vector<float> &image) {
     
 	for (auto &layer : this->network) {
         layer.activations.noalias() = (layer.weights * activations) + layer.biases;
-		layer.activations = (&layer == &this->network.back()) ? softmax(layer.activations) : layer.activations.unaryExpr(&ReLU);
+		layer.activations.noalias() = (&layer == &this->network.back()) ? softmax(layer.activations) : layer.activations.unaryExpr(&ReLU);
         activations = layer.activations;
     }
 }
