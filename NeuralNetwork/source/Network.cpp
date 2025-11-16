@@ -6,7 +6,6 @@
 
 NeuralNetwork::NeuralNetwork(const std::vector<size_t> &layout) : 
 	inputActivations(layout.front()),
-	expectedOutput(layout.back()),
 	batchScale(η / miniBatchSize)
 {
 	// validate network size
@@ -45,27 +44,24 @@ NeuralNetwork::NeuralNetwork(std::vector<size_t> &layer_sizes)
 
 // Uses mini-batch 'Stochastic Gradient Descent' to train model on the training_data
 void NeuralNetwork::trainModelSGD(std::vector<std::vector<float>> &training_data, std::vector<uint8_t> &training_labels) {
+	Eigen::VectorXf expectedOutput(this->network.back().activations.size());
+
 	// Used to track network's improvement across batches
 	size_t progressBar = 1;
 	size_t progressBarMax = 40;
-	// size_t batchNumber = 0;
-	// float currentBatchCost = 0.0f;
 
 	// train network on each image in the dataset
 	for (size_t i = 0; i < training_data.size(); ++i) {
 		this->_feedForward(training_data[i]);
 
 		// vectorize exepected output 
-		this->expectedOutput.setZero();
-		this->expectedOutput[training_labels[i]] = 1.0f;
+		expectedOutput.setZero();
+		expectedOutput[training_labels[i]] = 1.0f;
 
-		// currentBatchCost += calculateCost(this->network.back().activations, this->expectedOutput);
-		this->_backProp();
+		this->_backProp(expectedOutput);
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % this->miniBatchSize == 0) || i == training_data.size() - 1) {
-			// std::cerr << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
-			// currentBatchCost = 0;
 			this->_adjustNetwork();
 
 			// update progress bar
@@ -157,13 +153,13 @@ void NeuralNetwork::_feedForward(const std::vector<float> &image) {
     }
 }
 
-void NeuralNetwork::_backProp() {
+void NeuralNetwork::_backProp(Eigen::VectorXf &expectedOutput) {
 	// Derivation of δL 		: how much each output node contributed to the final cost
 	// C = 1/2∑j(yj−aLj) 		: cost function
 	// ∇aC = ∂C/∂aL = aL−y  	: rate of change of cost with respect to output activations aL
     // δL = (aL−y) ⊙ σ′(zL) 	: aL replaces zL here to minimise memory use, sigmoidPrime is updated accordingly
 	
-	this->network.back().delta = this->network.back().activations - this->expectedOutput;
+	this->network.back().delta = this->network.back().activations - expectedOutput;
 
 	// Backpropagate delta
 	for (int layer = static_cast<int>(this->network.size()) - 2; layer >= 0; --layer) {

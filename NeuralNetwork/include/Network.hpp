@@ -41,7 +41,6 @@ class NeuralNetwork {
 		std::unique_ptr<float[]> buffer;
 		std::vector<LayerView> network;
 		Eigen::VectorXf inputActivations;
-		Eigen::VectorXf expectedOutput;
 		
 		// Constants
 		const size_t miniBatchSize = 32; 
@@ -50,7 +49,7 @@ class NeuralNetwork {
 
 		// Methods
 		void _feedForward(const std::vector<float> &image);
-		void _backProp();
+		void _backProp(Eigen::VectorXf &expectedOutput);
 		void _adjustNetwork();
 
 	public: 
