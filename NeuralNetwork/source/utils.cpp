@@ -23,6 +23,11 @@ float ReLUPrime(float x) {
     return (x > 0.0f);
 }
 
+Eigen::VectorXf softmax(const Eigen::VectorXf &output) {
+    Eigen::VectorXf exps = (output.array() - output.maxCoeff()).exp();
+    return exps / exps.sum();
+}
+
 float calculateCost(const Eigen::VectorXf &output, const Eigen::VectorXf &expected_ouput) {
 	Eigen::VectorXf diff = output - expected_ouput;
 	float cost = diff.squaredNorm() / diff.size();

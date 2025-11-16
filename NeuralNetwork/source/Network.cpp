@@ -64,19 +64,19 @@ void NeuralNetwork::trainModelSGD(std::vector<std::vector<float>> &training_data
 
 		// adjust parameters after each mini-batch
 		if ((i > 1 && i % this->miniBatchSize == 0) || i == training_data.size() - 1) {
-			// std::cout << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
+			// std::cerr << "Mini-batch " << batchNumber++ << " cost: " << currentBatchCost / miniBatchSize << "\n";
 			// currentBatchCost = 0;
 			this->_adjustNetwork();
 
 			// update progress bar
 			if (i >= (progressBar * training_data.size() / progressBarMax)) {
-				std::cout << "|";
-				std::cout.flush();
+				std::cerr << "|";
+				std::cerr.flush();
 				progressBar++;
 			}
 		}
 	}
-	std::cout << std::endl;
+	std::cerr << std::endl;
 }
 
 float NeuralNetwork::test(std::vector<std::vector<float>> &test_data, std::vector<uint8_t> &test_labels) {
@@ -91,8 +91,8 @@ float NeuralNetwork::test(std::vector<std::vector<float>> &test_data, std::vecto
 		this->network.back().activations.maxCoeff(&prediction);
 		successCount += (static_cast<uint8_t>(prediction) == test_labels[i]);
 
-		// std::cout << "Prediction: " << prediction << "\n";
-		// std::cout << "Expected: " << static_cast<int>(test_labels[i]) << "\n";
+		// std::cerr << "Prediction: " << prediction << "\n";
+		// std::cerr << "Expected: " << static_cast<int>(test_labels[i]) << "\n";
 	}
 	return (static_cast<float>(successCount) / test_data.size());
 }
@@ -120,6 +120,27 @@ void NeuralNetwork::loadModel(const std::string &filename) {
     }
 }
 
+// Save weights and biases to binary file
+void NeuralNetwork::saveModel(std::ostream &out) {
+    if (!out) throw std::runtime_error("Cannot open file for saving model");
+
+    for (auto &layer : network) {
+        out.write(reinterpret_cast<char*>(layer.weights.data()), layer.weights.size() * sizeof(float));
+        out.write(reinterpret_cast<char*>(layer.biases.data()), layer.biases.size() * sizeof(float));
+    }
+}
+
+// Load weights and biases from binary file
+void NeuralNetwork::loadModel(std::istream &in) {
+    if (!in) throw std::runtime_error("Cannot open file for loading model");
+
+    for (auto &layer : network) {
+        in.read(reinterpret_cast<char*>(layer.weights.data()), layer.weights.size() * sizeof(float));
+        in.read(reinterpret_cast<char*>(layer.biases.data()), layer.biases.size() * sizeof(float));
+        if (!in) throw std::runtime_error("Error reading model from file");
+    }
+}
+
 /* 
 	--- Private Methods --- 
 */
@@ -131,7 +152,7 @@ void NeuralNetwork::_feedForward(const std::vector<float> &image) {
     
 	for (auto &layer : this->network) {
         layer.activations.noalias() = (layer.weights * activations) + layer.biases;
-        layer.activations = layer.activations.unaryExpr(&sigmoid);
+		layer.activations = (&layer == &this->network.back()) ? softmax(layer.activations) : layer.activations.unaryExpr(&ReLU);
         activations = layer.activations;
     }
 }
@@ -142,7 +163,7 @@ void NeuralNetwork::_backProp() {
 	// ∇aC = ∂C/∂aL = aL−y  	: rate of change of cost with respect to output activations aL
     // δL = (aL−y) ⊙ σ′(zL) 	: aL replaces zL here to minimise memory use, sigmoidPrime is updated accordingly
 	
-	this->network.back().delta = (this->network.back().activations - this->expectedOutput).cwiseProduct(this->network.back().activations.unaryExpr(&sigmoidPrime));
+	this->network.back().delta = this->network.back().activations - this->expectedOutput;
 
 	// Backpropagate delta
 	for (int layer = static_cast<int>(this->network.size()) - 2; layer >= 0; --layer) {
@@ -150,7 +171,7 @@ void NeuralNetwork::_backProp() {
 		LayerView &next = this->network[layer + 1];
 
 		//δl = ((wl+1)Tδl+1) ⊙ σ′(zl),
-		current.delta = (next.weights.transpose() * next.delta).cwiseProduct(current.activations.unaryExpr(&sigmoidPrime));
+		current.delta = (next.weights.transpose() * next.delta).cwiseProduct(current.activations.unaryExpr(&ReLUPrime));
 	}
 
 	// Compute Gradients
