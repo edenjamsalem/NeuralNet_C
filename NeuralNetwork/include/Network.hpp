@@ -45,7 +45,7 @@ class NeuralNetwork {
 		
 		// Constants
 		const size_t miniBatchSize = 32; 
-		const float η = 0.3f;	// learning rate (how large a step we take along our gradient)
+		const float η = 0.1f;	// learning rate (how large a step we take along our gradient)
 		const float batchScale;
 
 		// Methods
