@@ -23,6 +23,14 @@ float ReLUPrime(float x) {
     return (x > 0.0f);
 }
 
+float initXavier(size_t r, size_t c) {
+    return (std::sqrt(6.0f / (r + c)));
+}
+
+float initHe(size_t c) {
+    return (std::sqrt(2.0f / c));
+}
+
 Eigen::VectorXf softmax(const Eigen::VectorXf &output) {
     Eigen::VectorXf exps = (output.array() - output.maxCoeff()).exp();
     return exps / exps.sum();

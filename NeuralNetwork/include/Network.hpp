@@ -25,7 +25,7 @@ struct LayerView {
 		delta(start + (2 * r * c) + (3 * r), r)
 		{
 			weights.setRandom();
-			weights *= std::sqrt(6.0f / (r + c));
+			weights *= initHe(c);
 			biases.setZero();
 			activations.setZero();
 			dW.setZero();

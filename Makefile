@@ -1,6 +1,7 @@
 NAME = NN_Mnist
 CC = g++
 FLAGS = -O3 -DNDEBUG -march=native -std=c++17 \
+	-Wall -Werror -Wextra \
 	-I./NeuralNetwork/include/Eigen \
 	-I./NeuralNetwork/include \
 	-I./mnist/include
