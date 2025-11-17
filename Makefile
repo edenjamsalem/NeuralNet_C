@@ -1,6 +1,6 @@
 NAME = NN_Mnist
 CC = g++
-FLAGS = -Wall -Werror -Wextra -std=c++17 \
+FLAGS = -O3 -DNDEBUG -march=native -std=c++17 \
 	-I./NeuralNetwork/include/Eigen \
 	-I./NeuralNetwork/include \
 	-I./mnist/include
@@ -12,7 +12,7 @@ SRCS = 	./main.cpp	\
 		$(NNDIR)/Network.cpp
 
 OBJDIR = ./build
-OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)
+OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
 
 # compile step
 $(OBJDIR)/%.o: %.cpp
@@ -21,7 +21,7 @@ $(OBJDIR)/%.o: %.cpp
 
 # link step
 $(NAME): $(OBJS)
-	$(CC) $(FLAGS) $(OBJS) -o $(NAME)
+	$(CC) $(OBJS) -o $(NAME)
 
 # create build dir
 $(OBJDIR):
